@@ -1,0 +1,362 @@
+/* ============================================================================
+   PRODUCT — RentSpree screen components. Everything here is scoped under
+   .product and uses --rs-* tokens exclusively (see styles.css for the token
+   block and the register-split rationale). Nothing here references --page-*.
+
+   One exception, not a color: the progressive-disclosure transitions in the
+   household screen reuse --duration-*/--ease-* from the shared motion
+   vocabulary. Those aren't colors, and motion consistency was established as
+   a portfolio-level trait — call it out if that reuse is wrong.
+   ============================================================================ */
+
+/* Base .product layout/color lives in styles.css, next to the token block —
+   see the comment there for why it isn't declared here too. */
+
+/* Standalone presentation chrome — only for the test harness. Once a screen
+   is dropped into a device-frame (Prompt 1), the frame provides the radius
+   and shadow, so this modifier stays off in that context. */
+.product.standalone {
+  border-radius: 44px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
+.product * { box-sizing: border-box; }
+/* :where() keeps this reset's specificity at zero (just ".product") so every
+   .rs-* component class below — even a bare single class like .rs-btn-primary
+   — can still win the color/font it declares without needing to out-specify
+   "button"/"input" element selectors. Found the hard way: .rs-btn-primary's
+   color was silently losing to this reset because ".product button" (class +
+   element) is more specific than a single class. */
+.product :where(button) { font: inherit; color: inherit; cursor: pointer; }
+.product :where(input) { font: inherit; color: inherit; }
+
+/* ── Status bar ────────────────────────────────────────────────────────── */
+.rs-statusbar {
+  flex-shrink: 0;
+  height: 44px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--rs-ink);
+  transition: background-color .15s ease, color .15s ease;
+}
+/* Sits directly above .rs-hero-header on applications-list — matching its
+   fill so the two read as one continuous moss panel instead of a bone strip
+   sitting on top of a green one. */
+.rs-statusbar--on-hero { background: var(--rs-moss); color: var(--rs-bone); }
+.rs-statusbar-icons { display: flex; align-items: center; gap: 5px; }
+.rs-statusbar-icons svg { display: block; }
+
+/* ── Scroll area / bottom bar ─────────────────────────────────────────── */
+/* overscroll-behavior: contain stops scroll from chaining to the page once
+   this hits its top/bottom — without it, scrolling past the end of a live
+   (activated) phone's content keeps going and scrolls the case-study page
+   underneath it, which reads as the phone "leaking" scroll instead of being
+   its own contained surface. */
+.rs-scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.rs-bottom-bar { flex-shrink: 0; padding: 12px 20px 24px; background: var(--rs-bone); }
+
+.rs-btn-primary {
+  display: block;
+  width: 100%;
+  border: none;
+  border-radius: 14px;
+  background: var(--rs-ink);
+  color: var(--rs-paper);
+  font-family: var(--rs-font-body);
+  font-size: 16px;
+  font-weight: 700;
+  padding: 16px;
+  text-align: center;
+  transition: opacity .15s ease, transform .1s ease;
+}
+.rs-btn-primary:hover { opacity: .9; }
+.rs-btn-primary:active { transform: scale(.98); opacity: .82; }
+.rs-btn-primary:focus-visible { outline: 2px solid var(--rs-signal); outline-offset: 2px; }
+
+/* ── Icon buttons (nav, circular arrow) ───────────────────────────────── */
+.rs-icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent;
+  transition: background-color .15s ease;
+}
+.rs-icon-btn:hover { background: rgba(26, 26, 24, 0.06); }
+.rs-icon-btn:focus-visible { outline: 2px solid var(--rs-signal); outline-offset: 2px; }
+.rs-icon-btn--light { color: var(--rs-bone); }
+.rs-icon-btn--light:hover { background: rgba(242, 238, 231, 0.15); }
+.rs-icon-btn--dark-fill {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--rs-ink); color: var(--rs-paper); flex-shrink: 0;
+}
+.rs-icon-btn--dark-fill svg { width: 18px; height: 18px; }
+.rs-icon-btn--dark-fill:hover { opacity: .85; background: var(--rs-ink); }
+.rs-icon-btn--circle-bg { background: var(--rs-fog); }
+.rs-icon-btn--circle-bg:hover { background: var(--rs-fog); opacity: .8; }
+
+/* ── Nav bar (back / title / close) ───────────────────────────────────── */
+.rs-navbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 16px 8px;
+}
+.rs-navbar-title {
+  font-family: var(--rs-font-body); font-weight: 700; font-size: 15px; color: var(--rs-ink);
+  flex: 1; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 8px;
+}
+
+/* ── Floating scroll-to-top pill — long step screens only ─────────────── */
+.rs-scroll-top {
+  position: absolute; left: 16px; bottom: 16px; z-index: 6;
+  width: 40px; height: 40px; border-radius: 50%; border: none;
+  background: var(--rs-ink); color: var(--rs-paper);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  opacity: 0; pointer-events: none; transition: opacity .15s ease;
+}
+.rs-scroll-top.is-visible { opacity: 1; pointer-events: auto; }
+.rs-scroll-top:hover { opacity: .85; }
+
+/* ── Progress bar ──────────────────────────────────────────────────────── */
+.rs-progress-row { display: flex; align-items: center; gap: 12px; padding: 4px 20px 20px; }
+.rs-progress-track { flex: 1; height: 3px; border-radius: 2px; background: rgba(26, 26, 24, 0.12); overflow: hidden; }
+.rs-progress-fill { height: 100%; background: var(--rs-signal); border-radius: 2px; transition: width .2s ease; }
+.rs-progress-label {
+  font-family: var(--rs-font-body); font-size: 11px; font-weight: 600; color: var(--rs-ink); opacity: .62; flex-shrink: 0;
+}
+
+/* ── Headings / eyebrow ────────────────────────────────────────────────── */
+.rs-eyebrow {
+  font-family: var(--rs-font-body); font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--rs-ink); opacity: .62; margin: 0 0 6px;
+}
+.rs-h1 {
+  font-family: var(--rs-font-heading); font-weight: 400; font-size: 30px; line-height: 1.1;
+  color: var(--rs-ink); margin: 0 0 6px;
+}
+/* .62 is the floor that clears 4.5:1 against --rs-bone/--rs-paper/--rs-fog for
+   --rs-ink text — .5/.55/.6 (the values these opacity-muted rs- text styles
+   used before) measure 3.2–4.5:1 depending on background, below WCAG AA at
+   these font sizes. Applied wherever muted --rs-ink text sits under ~18px. */
+.rs-subtitle { font-family: var(--rs-font-body); font-size: 14px; color: var(--rs-ink); opacity: .62; margin: 0 0 20px; line-height: 1.5; }
+.rs-page-head { padding: 20px 20px 4px; }
+
+/* ── Hero header (applications-list) ──────────────────────────────────── */
+.rs-hero-header { background: var(--rs-moss); padding: 8px 12px 32px 20px; }
+.rs-hero-header .rs-nav-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 56px; }
+.rs-hero-title { font-family: var(--rs-font-heading); font-weight: 400; font-size: 42px; color: var(--rs-bone); margin: 0; }
+
+/* ── Cards ─────────────────────────────────────────────────────────────── */
+.rs-card {
+  background: var(--rs-paper);
+  border: 1px solid rgba(26, 26, 24, 0.08);
+  border-radius: 16px;
+  padding: 18px;
+  margin: 0 20px 16px;
+}
+.rs-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.rs-card-title { font-family: var(--rs-font-body); font-weight: 700; font-size: 16px; margin: 0; }
+
+.rs-edit-btn {
+  border: 1px solid rgba(26, 26, 24, 0.16); background: transparent; border-radius: 999px;
+  padding: 6px 14px; font-family: var(--rs-font-body); font-size: 12px; font-weight: 600; color: var(--rs-ink);
+  transition: background-color .15s ease, border-color .15s ease, transform .1s ease;
+}
+.rs-edit-btn:hover { background: rgba(26, 26, 24, 0.05); border-color: rgba(26, 26, 24, 0.28); }
+.rs-edit-btn:active { transform: scale(.96); }
+.rs-edit-btn:focus-visible { outline: 2px solid var(--rs-signal); outline-offset: 2px; }
+
+.rs-edit-link {
+  background: none; border: none; padding: 0; font-family: var(--rs-font-body); font-size: 13px; font-weight: 600;
+  color: var(--rs-ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px;
+}
+.rs-edit-link:hover { opacity: .7; }
+.rs-edit-link:focus-visible { outline: 2px solid var(--rs-signal); outline-offset: 2px; border-radius: 2px; }
+
+.rs-row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 10px 0; border-top: 1px solid rgba(26, 26, 24, 0.07);
+}
+.rs-row:first-of-type { border-top: none; padding-top: 0; }
+.rs-row-label { font-size: 13px; color: var(--rs-ink); opacity: .62; flex-shrink: 0; }
+.rs-row-value { font-size: 14px; font-weight: 600; color: var(--rs-ink); text-align: right; }
+.rs-row--link { align-items: center; }
+
+/* ── Overview: agent card ─────────────────────────────────────────────── */
+.rs-agent-card { display: flex; align-items: center; gap: 12px; }
+.rs-avatar {
+  width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; background: var(--rs-fog);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--rs-font-body); font-size: 13px; font-weight: 700; color: var(--rs-ink); opacity: .7;
+}
+.rs-agent-meta .rs-agent-label { font-size: 11px; color: var(--rs-ink); opacity: .62; margin: 0 0 2px; }
+.rs-agent-meta .rs-agent-name { font-size: 15px; font-weight: 700; margin: 0 0 2px; }
+.rs-agent-meta .rs-agent-email { font-size: 13px; color: var(--rs-ink); opacity: .62; }
+
+.rs-section-head { padding: 4px 20px 4px; }
+.rs-section-head .rs-h2 { font-family: var(--rs-font-body); font-weight: 700; font-size: 15px; margin: 0 0 4px; }
+.rs-section-head .rs-section-sub { font-size: 13px; color: var(--rs-ink); opacity: .62; margin: 0; }
+
+/* ── Steps list ────────────────────────────────────────────────────────── */
+.rs-steps { padding: 0; }
+.rs-step-row { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-top: 1px solid rgba(26, 26, 24, 0.07); }
+.rs-step-row:first-of-type { border-top: none; }
+.rs-step-badge {
+  width: 26px; height: 26px; border-radius: 50%; background: var(--rs-ink); color: var(--rs-paper); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-family: var(--rs-font-body); font-size: 12px; font-weight: 700;
+}
+.rs-step-label { flex: 1; font-size: 15px; font-weight: 600; }
+
+/* ── Property cards / status pills (applications-list) ────────────────── */
+.rs-list { padding: 24px 20px 8px; display: flex; flex-direction: column; gap: 14px; }
+.rs-property-card {
+  background: var(--rs-fog); border-radius: 16px; padding: 18px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0;
+}
+.rs-property-info { min-width: 0; }
+.rs-property-address { font-size: 15px; font-weight: 700; margin: 0 0 2px; }
+.rs-property-city { font-size: 14px; color: var(--rs-ink); opacity: .62; margin: 0 0 10px; }
+.rs-pill {
+  display: inline-block; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 999px;
+  background: var(--rs-paper); border: 1px solid rgba(26, 26, 24, 0.1); color: var(--rs-ink);
+}
+.rs-pill--submitted { background: var(--rs-mint); color: var(--rs-moss); }
+
+/* ── Household: stacked radio rows + progressive disclosure ───────────── */
+.rs-field-group { padding: 0 20px 20px; }
+.rs-field-section-title {
+  font-family: var(--rs-font-heading); font-weight: 400; font-size: 20px; color: var(--rs-ink);
+  margin: 8px 20px 14px;
+}
+.rs-field-label { font-size: 15px; font-weight: 600; margin: 0 0 10px; }
+.rs-field-helper { font-size: 12.5px; color: var(--rs-ink); opacity: .62; margin: -4px 0 12px; line-height: 1.5; }
+
+/* Stacked Yes/No rows — pixel-matched to the 08-19 refs: selected is a pale
+   --rs-signal-tint fill with a solid --rs-ink border, not the pill-toggle
+   pair this replaced. */
+.rs-radio-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+.rs-radio-row {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 14px 16px; border-radius: 12px;
+  border: 1.5px solid rgba(26, 26, 24, 0.14); background: var(--rs-paper);
+  font-family: var(--rs-font-body); font-size: 15px; font-weight: 500; color: var(--rs-ink);
+  transition: background-color .15s ease, border-color .15s ease;
+}
+.rs-radio-row:hover { border-color: rgba(26, 26, 24, 0.28); }
+.rs-radio-row.is-selected { background: var(--rs-signal-tint); border-color: var(--rs-ink); }
+.rs-radio-row:focus-visible { outline: 2px solid var(--rs-signal); outline-offset: 2px; }
+.rs-radio-dot {
+  width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid rgba(26, 26, 24, 0.32);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+.rs-radio-row.is-selected .rs-radio-dot { background: var(--rs-ink); border-color: var(--rs-ink); }
+.rs-radio-dot::after {
+  content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--rs-paper);
+  opacity: 0; transition: opacity .1s ease;
+}
+.rs-radio-row.is-selected .rs-radio-dot::after { opacity: 1; }
+
+/* Expand panel — the tan (--rs-fog) card that opens under a "Yes". */
+.rs-expand-panel {
+  background: var(--rs-fog); border-radius: 14px; padding: 14px; margin-top: 4px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.rs-expand-panel-header { display: flex; align-items: center; justify-content: space-between; }
+.rs-expand-panel-header span { font-size: 13px; font-weight: 600; color: var(--rs-ink); opacity: .65; }
+.rs-expand-panel-close {
+  width: 26px; height: 26px; border-radius: 50%; border: none; background: rgba(26, 26, 24, 0.08);
+  color: var(--rs-ink); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: background-color .15s ease;
+}
+.rs-expand-panel-close:hover { background: rgba(26, 26, 24, 0.16); }
+.rs-expand-panel-close:focus-visible { outline: 2px solid var(--rs-signal); outline-offset: 2px; }
+.rs-expand-panel-helper { font-size: 12px; color: var(--rs-ink); opacity: .62; line-height: 1.5; margin: 0; }
+
+.rs-add-row {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+  border: 1px solid rgba(26, 26, 24, 0.14); border-radius: 12px; background: var(--rs-paper);
+  padding: 13px; margin-top: 10px; font-family: var(--rs-font-body); font-size: 14px; font-weight: 600; color: var(--rs-ink);
+  transition: background-color .15s ease, border-color .15s ease;
+}
+.rs-add-row:hover { background: rgba(26, 26, 24, 0.03); border-color: rgba(26, 26, 24, 0.28); }
+.rs-add-row:focus-visible { outline: 2px solid var(--rs-signal); outline-offset: 2px; }
+
+.rs-field-divider { border: none; border-top: 1px solid rgba(26, 26, 24, 0.1); margin: 8px 20px 24px; }
+
+.rs-reveal {
+  max-height: 0; overflow: hidden; opacity: 0;
+  transition: max-height var(--duration-slow, .25s) var(--ease-enter, ease), opacity var(--duration-base, .2s) ease;
+}
+.rs-reveal.is-open { opacity: 1; }
+.rs-reveal-inner { padding-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+.rs-input-row { display: flex; flex-direction: column; gap: 4px; }
+.rs-input-row label { font-size: 12px; font-weight: 600; color: var(--rs-ink); opacity: .62; }
+.rs-input-row input {
+  border: 1px solid rgba(26, 26, 24, 0.16); border-radius: 10px; padding: 11px 12px; background: var(--rs-paper); font-size: 14px;
+}
+.rs-input-row input::placeholder { color: var(--rs-ink); opacity: .35; }
+.rs-input-row input:focus { outline: none; border-color: var(--rs-signal); box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.14); }
+
+.rs-input-row--minor { opacity: .8; }
+.rs-input-row--minor label { font-weight: 500; }
+.rs-input-row--minor input { max-width: 120px; }
+
+/* ── Payment: total, package, card fields ─────────────────────────────── */
+.rs-total-row {
+  display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+  background: none; border: none; width: 100%; padding: 0; text-align: left;
+}
+.rs-total-row .rs-total-label { font-size: 15px; font-weight: 700; }
+.rs-total-amounts { display: flex; align-items: center; gap: 8px; }
+.rs-total-amounts .rs-total-value { font-size: 16px; font-weight: 700; }
+.rs-total-chevron { transition: transform .2s ease; color: var(--rs-ink); opacity: .5; }
+.rs-total-chevron.is-open { transform: rotate(180deg); }
+
+.rs-total-breakdown {
+  max-height: 0; overflow: hidden;
+  transition: max-height var(--duration-slow, .25s) var(--ease-enter, ease);
+}
+.rs-total-breakdown.is-open { }
+.rs-total-breakdown-inner { padding-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.rs-line-item { display: flex; justify-content: space-between; font-size: 13px; color: var(--rs-ink); opacity: .65; }
+
+.rs-checkbox-row { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
+.rs-checkbox {
+  width: 20px; height: 20px; border-radius: 6px; border: 1.5px solid rgba(26, 26, 24, 0.28); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; margin-top: 1px; transition: background-color .15s ease, border-color .15s ease;
+}
+.rs-checkbox.is-checked { background: var(--rs-ink); border-color: var(--rs-ink); color: var(--rs-paper); }
+.rs-checkbox svg { opacity: 0; transition: opacity .1s ease; }
+.rs-checkbox.is-checked svg { opacity: 1; }
+.rs-checkbox-copy .rs-checkbox-title { font-size: 14px; font-weight: 700; margin: 0 0 4px; }
+.rs-checkbox-copy .rs-checkbox-desc { font-size: 12.5px; color: var(--rs-ink); opacity: .62; line-height: 1.5; margin: 0; }
+
+.rs-field-block-label { font-size: 15px; font-weight: 700; margin: 0 20px 12px; }
+.rs-payment-fields { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+.rs-payment-fields input {
+  width: 100%; border: 1px solid rgba(26, 26, 24, 0.16); border-radius: 12px; padding: 14px; background: var(--rs-paper); font-size: 14px;
+}
+.rs-payment-fields input::placeholder { color: var(--rs-ink); opacity: .4; }
+.rs-payment-fields input:focus { outline: none; border-color: var(--rs-signal); box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.14); }
+.rs-payment-fields .rs-field-row { display: flex; gap: 10px; }
+
+.rs-save-card-row { padding: 4px 20px 4px; }
+
+/* ── Plain step-form fields (Your Details) ─────────────────────────────── */
+.rs-form-fields { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+.rs-form-fields input {
+  width: 100%; border: 1px solid rgba(26, 26, 24, 0.16); border-radius: 12px; padding: 14px;
+  background: var(--rs-paper); font-family: var(--rs-font-body); font-size: 14px; color: var(--rs-ink);
+}
+.rs-form-fields input::placeholder { color: var(--rs-ink); opacity: .4; }
+.rs-form-fields input:focus { outline: none; border-color: var(--rs-signal); box-shadow: 0 0 0 3px rgba(59, 91, 219, 0.14); }
+.rs-field-icon-wrap { position: relative; }
+.rs-field-icon-wrap input { padding-right: 44px; }
+.rs-field-icon-wrap .rs-field-icon {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--rs-ink); opacity: .55; pointer-events: none; display: flex;
+}
+.rs-form-checkbox-row { padding: 2px 0 2px; }

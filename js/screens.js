@@ -1,0 +1,576 @@
+/* ============================================================================
+   APPLICANTS — RentSpree screen builders. Vanilla JS, no build step, no
+   framework. Each function returns a DOM node scoped under class "product"
+   (the RentSpree token scope — see styles.css). Plain globals, not ES
+   modules, to match the rest of the codebase's script-tag convention.
+   ============================================================================ */
+
+/* ── DOM helper ────────────────────────────────────────────────────────── */
+function h(tag, props, ...children) {
+  const el = document.createElement(tag);
+  if (props) {
+    Object.entries(props).forEach(([k, v]) => {
+      if (v === undefined || v === null || v === false) return;
+      if (k === 'class') el.className = v;
+      else if (k === 'text') el.textContent = v;
+      else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2).toLowerCase(), v);
+      else el.setAttribute(k, v === true ? '' : v);
+    });
+  }
+  children.flat().forEach(c => {
+    if (c === null || c === undefined) return;
+    el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  });
+  return el;
+}
+
+function svg(inner, viewBox) {
+  const vb = viewBox || '0 0 24 24';
+  // Explicit width/height (taken straight from the viewBox) rather than
+  // leaving the SVG to size itself: found the hard way that a bare <svg>
+  // only rendered at a sane size because every icon so far happened to sit
+  // in a fixed-height flex container (icon buttons, the status bar). Drop
+  // one into a container with auto height — .rs-add-row's "+" — and with no
+  // definite cross-size to shrink against, the browser falls back to its
+  // ~300x150 replaced-element default, scaled to a huge square by the
+  // viewBox's 1:1 aspect ratio. Explicit dimensions make every icon
+  // deterministic regardless of what it's sitting inside.
+  const [, , w, hgt] = vb.split(' ').map(Number);
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `<svg viewBox="${vb}" width="${w}" height="${hgt}" fill="none" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+  return wrap.firstElementChild;
+}
+
+/* ── Icons — simplified, not traced from iOS glyphs ──────────────────────
+   Good-enough first pass; swap for exact glyphs later if fidelity matters. */
+const Icon = {
+  back: () => svg('<path d="M15 5L8 12l7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'),
+  kebab: () => svg('<circle cx="12" cy="5" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="19" r="1.6" fill="currentColor"/>'),
+  close: () => svg('<path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'),
+  arrowRight: () => svg('<path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'),
+  chevronDown: () => svg('<path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'),
+  check: () => svg('<path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'),
+  signal: () => svg('<rect x="1" y="9" width="3" height="5" rx="0.5" fill="currentColor"/><rect x="6" y="6.5" width="3" height="7.5" rx="0.5" fill="currentColor"/><rect x="11" y="4" width="3" height="10" rx="0.5" fill="currentColor"/><rect x="16" y="1.5" width="3" height="12.5" rx="0.5" fill="currentColor"/>', '0 0 20 16'),
+  wifi: () => svg('<path d="M1 6.5C5.8 2 14.2 2 19 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M4.3 9.8C7.7 6.7 12.3 6.7 15.7 9.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M7.6 13C9.5 11.3 10.5 11.3 12.4 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>', '0 0 20 16'),
+  battery: () => svg('<rect x="0.75" y="1.75" width="19" height="10.5" rx="2.5" stroke="currentColor" stroke-width="1.2"/><rect x="2.25" y="3.25" width="14.5" height="7.5" rx="1.3" fill="currentColor"/><rect x="20.5" y="5" width="1.5" height="4" rx="0.7" fill="currentColor"/>', '0 0 23 14'),
+  chevronUp: () => svg('<path d="M6 15l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'),
+  plus: () => svg('<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'),
+  calendar: () => svg('<rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 9.5h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'),
+  phone: () => svg('<path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.2 1L6.6 10.8z" fill="currentColor"/>'),
+  envelope: () => svg('<rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M4 6.5l8 6 8-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'),
+};
+
+function statusBar({ onHero } = {}) {
+  return h('div', { class: 'rs-statusbar' + (onHero ? ' rs-statusbar--on-hero' : '') },
+    h('span', { text: '9:41' }),
+    h('span', { class: 'rs-statusbar-icons' }, Icon.signal(), Icon.wifi(), Icon.battery())
+  );
+}
+
+/* Shared nav (circle back / title / close) + progress bar, used by every
+   multi-step screen (household, review, payment, your-details) so the step
+   chrome can't drift between them. */
+function stepHeader({ title, step, total }) {
+  const backBtn = h('button', { class: 'rs-icon-btn rs-icon-btn--circle-bg', 'aria-label': 'Back' }, Icon.back());
+  backBtn.addEventListener('click', () => {
+    backBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'back' } }));
+  });
+  return h('div', {},
+    h('div', { class: 'rs-navbar' },
+      backBtn,
+      h('span', { class: 'rs-navbar-title', text: title }),
+      h('button', { class: 'rs-icon-btn', 'aria-label': 'Close' }, Icon.close())
+    ),
+    h('div', { class: 'rs-progress-row' },
+      h('div', { class: 'rs-progress-track' }, h('div', { class: 'rs-progress-fill', style: `width:${(step / total) * 100}%;` })),
+      h('span', { class: 'rs-progress-label', text: `${step} of ${total}` })
+    )
+  );
+}
+
+/* Floating scroll-to-top control for the long step screens in the refs —
+   fades in once the screen has scrolled, scrolls the .rs-scroll back to 0. */
+function scrollTopControl(scrollEl) {
+  const btn = h('button', { class: 'rs-scroll-top', type: 'button', 'aria-label': 'Scroll to top' }, Icon.chevronUp());
+  btn.addEventListener('click', () => scrollEl.scrollTo({ top: 0, behavior: 'smooth' }));
+  scrollEl.addEventListener('scroll', () => {
+    btn.classList.toggle('is-visible', scrollEl.scrollTop > 80);
+  }, { passive: true });
+  return btn;
+}
+
+/* ============================================================================
+   1. applications-list
+   ============================================================================ */
+
+const PROPERTIES = [
+  { address: '789 Birch Blvd, Unit 8', city: 'Austin, TX 73301', status: 'not-started', label: 'Not started' },
+  { address: '412 Cypress Trail', city: 'Austin, TX 78745', status: 'in-progress', label: 'In progress' },
+  { address: '1908 Marigold Ct, Apt 5', city: 'Round Rock, TX 78664', status: 'submitted', label: 'Submitted' },
+];
+
+function propertyCard(p) {
+  return h('div', { class: 'rs-property-card' },
+    h('div', { class: 'rs-property-info' },
+      h('p', { class: 'rs-property-address', text: p.address }),
+      h('p', { class: 'rs-property-city', text: p.city }),
+      h('span', { class: 'rs-pill' + (p.status === 'submitted' ? ' rs-pill--submitted' : ''), text: p.label })
+    ),
+    h('button', { class: 'rs-icon-btn rs-icon-btn--dark-fill', 'aria-label': `Open ${p.address}` }, Icon.arrowRight())
+  );
+}
+
+function applicationsList() {
+  return h('div', { class: 'product' },
+    statusBar({ onHero: true }),
+    h('div', { class: 'rs-scroll' },
+      h('div', { class: 'rs-hero-header' },
+        h('div', { class: 'rs-nav-row' },
+          h('button', { class: 'rs-icon-btn rs-icon-btn--light', 'aria-label': 'Back' }, Icon.back()),
+          h('button', { class: 'rs-icon-btn rs-icon-btn--light', 'aria-label': 'More' }, Icon.kebab())
+        ),
+        h('h1', { class: 'rs-hero-title', text: 'Applications' })
+      ),
+      h('div', { class: 'rs-list' }, PROPERTIES.map(propertyCard))
+    ),
+    h('div', { class: 'rs-bottom-bar' },
+      h('button', { class: 'rs-btn-primary', text: 'Finish applications' })
+    )
+  );
+}
+
+/* ============================================================================
+   2. overview — one function, two states. Only the step badges/Edit buttons
+   and the bottom-button label may differ between 'fresh' and 'resumed'.
+   ============================================================================ */
+
+const OVERVIEW_STEPS = [
+  { n: 1, label: 'This rental' },
+  { n: 2, label: 'About you' },
+  { n: 3, label: 'Credit and background' },
+  { n: 4, label: 'Review and pay' },
+];
+
+function stepRow(step, done) {
+  return h('div', { class: 'rs-step-row' },
+    h('div', { class: 'rs-step-badge' }, done ? Icon.check() : h('span', { text: String(step.n) })),
+    h('span', { class: 'rs-step-label', text: step.label }),
+    done ? h('button', { class: 'rs-edit-btn', text: 'Edit' }) : null
+  );
+}
+
+function overview(state) {
+  const resumed = state === 'resumed';
+
+  const primaryBtn = h('button', { class: 'rs-btn-primary', text: resumed ? 'Continue' : 'Start application' });
+  primaryBtn.addEventListener('click', () => {
+    primaryBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'yourDetails' } }));
+  });
+
+  return h('div', { class: 'product' },
+    statusBar(),
+    h('div', { class: 'rs-scroll' },
+      h('div', { class: 'rs-navbar' },
+        h('button', { class: 'rs-icon-btn', 'aria-label': 'Back' }, Icon.back())
+      ),
+      h('div', { class: 'rs-page-head' },
+        h('p', { class: 'rs-eyebrow', text: 'Applying to' }),
+        h('h1', { class: 'rs-h1', text: '789 Birch Blvd, Unit 8' }),
+        h('p', { class: 'rs-subtitle', text: 'Austin, TX 73301', style: 'margin-bottom:20px;' })
+      ),
+      h('div', { class: 'rs-card rs-agent-card' },
+        h('div', { class: 'rs-avatar', text: 'JB' }),
+        h('div', { class: 'rs-agent-meta' },
+          h('p', { class: 'rs-agent-label', text: 'Application goes to' }),
+          h('p', { class: 'rs-agent-name', text: 'Jordan Blake' }),
+          h('p', { class: 'rs-agent-email', text: 'jordan.blake@rentspree.com' })
+        )
+      ),
+      h('div', { class: 'rs-section-head' },
+        h('p', { class: 'rs-h2', text: 'Your application' }),
+        h('p', { class: 'rs-section-sub', text: 'About 10 minutes. Your progress saves as you go.' })
+      ),
+      h('div', { class: 'rs-card rs-steps', style: 'margin-top:14px;' },
+        OVERVIEW_STEPS.map(step => stepRow(step, resumed && step.n < 4))
+      )
+    ),
+    h('div', { class: 'rs-bottom-bar' }, primaryBtn)
+  );
+}
+
+/* ============================================================================
+   3. household — the interactive one. Real progressive disclosure, not a
+   toggled state from outside.
+   ============================================================================ */
+
+function revealPanel(contentEl) {
+  const panel = h('div', { class: 'rs-reveal' }, h('div', { class: 'rs-reveal-inner' }, contentEl));
+  function setOpen(open) {
+    if (open) {
+      panel.classList.add('is-open');
+      panel.style.maxHeight = panel.scrollHeight + 'px';
+    } else {
+      panel.style.maxHeight = panel.scrollHeight + 'px'; // lock current height before collapsing
+      requestAnimationFrame(() => {
+        panel.classList.remove('is-open');
+        panel.style.maxHeight = '0px';
+      });
+    }
+  }
+  panel._setOpen = setOpen;
+  return panel;
+}
+
+/* Stacked Yes/No radio rows — pale --rs-signal-tint fill + solid border on
+   the selected row, matching the 08-19 refs. Replaces the old side-by-side
+   segmented toggle. */
+function radioYesNo(onChange) {
+  const yesRow = h('button', { type: 'button', class: 'rs-radio-row' },
+    h('span', { text: 'Yes' }), h('span', { class: 'rs-radio-dot' })
+  );
+  const noRow = h('button', { type: 'button', class: 'rs-radio-row' },
+    h('span', { text: 'No' }), h('span', { class: 'rs-radio-dot' })
+  );
+  function set(v) {
+    yesRow.classList.toggle('is-selected', v === true);
+    noRow.classList.toggle('is-selected', v === false);
+    onChange(v);
+  }
+  yesRow.addEventListener('click', () => set(true));
+  noRow.addEventListener('click', () => set(false));
+  return h('div', { class: 'rs-radio-list' }, yesRow, noRow);
+}
+
+function inputRow(labelText, placeholder, minor) {
+  return h('div', { class: 'rs-input-row' + (minor ? ' rs-input-row--minor' : '') },
+    h('label', { text: labelText }),
+    h('input', { type: 'text', placeholder: placeholder || '', autocomplete: 'off' })
+  );
+}
+
+/* One tan (--rs-fog) entry panel — "Pet 1", "First additional tenant" —
+   with its own remove control. onRemove is optional (the tenant panel isn't
+   removable since there's nothing above it to fall back to). */
+function expandEntryPanel(label, fieldsEl, onRemove) {
+  const panel = h('div', { class: 'rs-expand-panel' },
+    h('div', { class: 'rs-expand-panel-header' },
+      h('span', { text: label }),
+      onRemove ? h('button', { class: 'rs-expand-panel-close', type: 'button', 'aria-label': `Remove ${label}` }, Icon.close()) : null
+    ),
+    fieldsEl
+  );
+  if (onRemove) panel.querySelector('.rs-expand-panel-close').addEventListener('click', onRemove);
+  return panel;
+}
+
+function household() {
+  const scrollEl = h('div', { class: 'rs-scroll' });
+
+  /* ── Pets — repeatable ─────────────────────────────────────────────── */
+  const petsList = h('div', {});
+  let petCount = 0;
+  function addPet() {
+    petCount += 1;
+    const n = petCount;
+    const fields = h('div', {}, inputRow('Type / breed', 'e.g. Labrador retriever'), inputRow('Weight (lbs)', 'Optional'));
+    const panel = expandEntryPanel(`Pet ${n}`, fields, () => { panel.remove(); });
+    petsList.appendChild(panel);
+  }
+  addPet();
+  const addPetBtn = h('button', { class: 'rs-add-row', type: 'button' }, Icon.plus(), h('span', { text: 'Add additional pet' }));
+  addPetBtn.addEventListener('click', addPet);
+
+  const petsReveal = revealPanel(h('div', {}, petsList, addPetBtn));
+  const petsRadio = radioYesNo(v => petsReveal._setOpen(v === true));
+
+  /* ── Additional tenants ────────────────────────────────────────────── */
+  const tenantFields = h('div', {},
+    inputRow('First name', ''),
+    inputRow('Last name', ''),
+    inputRow('Email or phone', ''),
+    h('p', { class: 'rs-expand-panel-helper', text: "We'll send them their own application link on submit." }),
+    inputRow('Tenants under 18', 'Optional', true)
+  );
+  const tenantPanel = expandEntryPanel('First additional tenant', tenantFields, null);
+  const tenantsReveal = revealPanel(tenantPanel);
+  const tenantsRadio = radioYesNo(v => tenantsReveal._setOpen(v === true));
+
+  scrollEl.append(
+    stepHeader({ title: '789 Birch Blvd, Unit 8', step: 1, total: 4 }),
+    h('div', { class: 'rs-page-head' },
+      h('h1', { class: 'rs-h1', text: 'Who will live here' })
+    ),
+    h('p', { class: 'rs-field-section-title', text: 'Pets' }),
+    h('div', { class: 'rs-field-group' },
+      h('p', { class: 'rs-field-label', text: 'Do you have pets?' }),
+      petsRadio,
+      petsReveal
+    ),
+    h('hr', { class: 'rs-field-divider' }),
+    h('p', { class: 'rs-field-section-title', text: 'Additional tenants' }),
+    h('div', { class: 'rs-field-group' },
+      h('p', { class: 'rs-field-helper', text: "List anyone 18 or over. For under 18, the count below is enough.", style: 'margin-top:-8px;' }),
+      h('p', { class: 'rs-field-label', text: 'Will anyone else live here with you?', style: 'margin-top:14px;' }),
+      tenantsRadio,
+      tenantsReveal
+    )
+  );
+
+  return h('div', { class: 'product' },
+    statusBar(),
+    scrollEl,
+    h('div', { class: 'rs-bottom-bar' },
+      h('button', { class: 'rs-btn-primary', text: 'Continue' })
+    ),
+    scrollTopControl(scrollEl)
+  );
+}
+
+/* ============================================================================
+   4. review
+   ============================================================================ */
+
+function reviewRow(label, value) {
+  return h('div', { class: 'rs-row' },
+    h('span', { class: 'rs-row-label', text: label }),
+    h('span', { class: 'rs-row-value', text: value })
+  );
+}
+
+function review() {
+  const scrollEl = h('div', { class: 'rs-scroll' },
+      stepHeader({ title: '789 Birch Blvd, Unit 8', step: 1, total: 2 }),
+      h('div', { class: 'rs-page-head' },
+        h('h1', { class: 'rs-h1', text: 'Review your application' }),
+        h('p', { class: 'rs-subtitle', text: 'Check everything before it goes to Jordan. You can still edit.' })
+      ),
+      h('div', { class: 'rs-card' },
+        h('div', { class: 'rs-card-header' },
+          h('p', { class: 'rs-card-title', text: 'Basic info' }),
+          h('button', { class: 'rs-edit-btn', text: 'Edit' })
+        ),
+        reviewRow('Full legal name', 'Taylor Reese Morgan'),
+        reviewRow('Date of birth', 'Apr 18, 1992'),
+        reviewRow('Phone', '(512) 555-0134'),
+        reviewRow('Email', 'taylor.morgan@example.com')
+      ),
+      h('div', { class: 'rs-card' },
+        h('div', { class: 'rs-card-header' },
+          h('p', { class: 'rs-card-title', text: 'This rental' }),
+          h('button', { class: 'rs-edit-btn', text: 'Edit' })
+        ),
+        reviewRow('Your role in this application', 'Tenant'),
+        reviewRow('Desired move-in date', 'Sep 1, 2026'),
+        reviewRow('Monthly rent', '$2,400'),
+        reviewRow('Represented by a renter’s agent', 'No'),
+        reviewRow('Applying with a guarantor or co-signer', 'No'),
+        h('div', { class: 'rs-row rs-row--link' },
+          h('span', { class: 'rs-row-label', text: 'Who else lives here' }),
+          h('button', { class: 'rs-edit-btn', text: 'Edit' })
+        )
+      )
+  );
+
+  return h('div', { class: 'product' },
+    statusBar(),
+    scrollEl,
+    h('div', { class: 'rs-bottom-bar' },
+      h('button', { class: 'rs-btn-primary', text: 'Continue' })
+    ),
+    scrollTopControl(scrollEl)
+  );
+}
+
+/* ============================================================================
+   5. payment — working total, working checkbox, focusable fields, inert Pay.
+   ============================================================================ */
+
+const PAYMENT_LINE_ITEMS = [
+  { key: 'app-fee', label: 'Application fee', amount: 49.99, always: true },
+  { key: 'screening', label: 'Reusable Screening Package', amount: 15.00, always: false },
+];
+
+function money(n) { return `$${n.toFixed(2)}`; }
+
+function payment() {
+  let screeningIncluded = true;
+
+  const totalValueEl = h('span', { class: 'rs-total-value' });
+  const chevronWrap = h('span', { class: 'rs-total-chevron' }, Icon.chevronDown());
+  const breakdownInner = h('div', { class: 'rs-total-breakdown-inner' });
+  const breakdown = h('div', { class: 'rs-total-breakdown' }, breakdownInner);
+
+  function currentTotal() {
+    return PAYMENT_LINE_ITEMS.reduce((sum, item) => sum + (item.always || screeningIncluded ? item.amount : 0), 0);
+  }
+
+  function renderBreakdown() {
+    breakdownInner.innerHTML = '';
+    PAYMENT_LINE_ITEMS.forEach(item => {
+      if (!item.always && !screeningIncluded) return;
+      breakdownInner.appendChild(h('div', { class: 'rs-line-item' },
+        h('span', { text: item.label }),
+        h('span', { text: money(item.amount) })
+      ));
+    });
+  }
+
+  function renderTotal() {
+    totalValueEl.textContent = money(currentTotal());
+    renderBreakdown();
+    if (breakdown.classList.contains('is-open')) {
+      breakdown.style.maxHeight = breakdown.scrollHeight + 'px';
+    }
+  }
+
+  const totalRow = h('button', { class: 'rs-total-row', type: 'button' },
+    h('span', { class: 'rs-total-label', text: 'Total' }),
+    h('span', { class: 'rs-total-amounts' }, totalValueEl, chevronWrap)
+  );
+  totalRow.addEventListener('click', () => {
+    const open = !breakdown.classList.contains('is-open');
+    chevronWrap.firstElementChild.classList.toggle('is-open', open);
+    if (open) {
+      breakdown.classList.add('is-open');
+      breakdown.style.maxHeight = breakdown.scrollHeight + 'px';
+    } else {
+      breakdown.style.maxHeight = breakdown.scrollHeight + 'px';
+      requestAnimationFrame(() => {
+        breakdown.classList.remove('is-open');
+        breakdown.style.maxHeight = '0px';
+      });
+    }
+  });
+
+  const checkboxMark = h('div', { class: 'rs-checkbox is-checked' }, Icon.check());
+  const screeningRow = h('div', { class: 'rs-checkbox-row', role: 'checkbox', 'aria-checked': 'true', tabindex: '0' },
+    checkboxMark,
+    h('div', { class: 'rs-checkbox-copy' },
+      h('p', { class: 'rs-checkbox-title', text: 'Reusable Screening Package ($15)' }),
+      h('p', { class: 'rs-checkbox-desc', text: "Apply to as many properties as you like for 30 days. Add-ons are priced separately, so adding or removing one won’t change anything else in your cart." })
+    )
+  );
+  function toggleScreening() {
+    screeningIncluded = !screeningIncluded;
+    checkboxMark.classList.toggle('is-checked', screeningIncluded);
+    screeningRow.setAttribute('aria-checked', String(screeningIncluded));
+    renderTotal();
+  }
+  screeningRow.addEventListener('click', toggleScreening);
+  screeningRow.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleScreening(); } });
+
+  const saveCardMark = h('div', { class: 'rs-checkbox' }, Icon.check());
+  const saveCardRow = h('div', { class: 'rs-checkbox-row', role: 'checkbox', 'aria-checked': 'false', tabindex: '0' },
+    saveCardMark,
+    h('div', { class: 'rs-checkbox-copy' }, h('p', { class: 'rs-checkbox-title', text: 'Save this card for future payments' }))
+  );
+  function toggleSaveCard() {
+    const checked = saveCardMark.classList.toggle('is-checked');
+    saveCardRow.setAttribute('aria-checked', String(checked));
+  }
+  saveCardRow.addEventListener('click', toggleSaveCard);
+  saveCardRow.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleSaveCard(); } });
+
+  renderTotal();
+
+  // "You click into the empty states, and it autofills in fake information.
+  // That's as far as that design needs to go." — no validation, no storage,
+  // just a plausible value dropped in on first focus.
+  function autofillOnFocus(input, fakeValue) {
+    input.addEventListener('focus', () => {
+      if (!input.value) input.value = fakeValue;
+    }, { once: true });
+  }
+  const cardNumberInput = h('input', { type: 'text', inputmode: 'numeric', placeholder: 'Card number', autocomplete: 'off' });
+  const expirationInput = h('input', { type: 'text', placeholder: 'Expiration (MM/YY)', autocomplete: 'off' });
+  const cvcInput = h('input', { type: 'text', inputmode: 'numeric', placeholder: 'CVC', autocomplete: 'off' });
+  autofillOnFocus(cardNumberInput, '4242 4242 4242 4242');
+  autofillOnFocus(expirationInput, '12/29');
+  autofillOnFocus(cvcInput, '123');
+
+  const scrollEl = h('div', { class: 'rs-scroll' },
+    stepHeader({ title: '789 Birch Blvd, Unit 8', step: 2, total: 2 }),
+    h('div', { class: 'rs-page-head' },
+      h('h1', { class: 'rs-h1', text: 'Confirm and pay' }),
+      h('p', { class: 'rs-subtitle', text: 'Your reports run as soon as you submit.' })
+    ),
+    h('div', { class: 'rs-card' }, totalRow, breakdown),
+    h('div', { class: 'rs-card' }, screeningRow),
+    h('p', { class: 'rs-field-block-label', text: 'Payment method' }),
+    h('div', { class: 'rs-payment-fields' },
+      cardNumberInput,
+      h('div', { class: 'rs-field-row' }, expirationInput, cvcInput)
+    ),
+    h('div', { class: 'rs-save-card-row' }, saveCardRow)
+  );
+
+  return h('div', { class: 'product' },
+    statusBar(),
+    scrollEl,
+    h('div', { class: 'rs-bottom-bar' },
+      h('button', { class: 'rs-btn-primary', text: 'Pay' })
+    ),
+    scrollTopControl(scrollEl)
+  );
+}
+
+/* ============================================================================
+   6. your-details — a general example of the step-form shell (nav, progress,
+   plain fields) the rest of the "About you" flow will reuse. Fields are
+   functional (focus states) but not autofilled — that gimmick is scoped to
+   the payment screen only, per direction.
+   ============================================================================ */
+
+function fieldWithIcon(placeholder, iconFn, inputProps) {
+  return h('div', { class: 'rs-field-icon-wrap' },
+    h('input', Object.assign({ type: 'text', placeholder, autocomplete: 'off' }, inputProps || {})),
+    h('span', { class: 'rs-field-icon' }, iconFn())
+  );
+}
+
+function yourDetails() {
+  const noMiddleMark = h('div', { class: 'rs-checkbox' }, Icon.check());
+  const middleNameInput = h('input', { type: 'text', placeholder: 'Middle name', autocomplete: 'off' });
+  const noMiddleRow = h('div', { class: 'rs-checkbox-row', role: 'checkbox', 'aria-checked': 'false', tabindex: '0' },
+    noMiddleMark,
+    h('div', { class: 'rs-checkbox-copy' }, h('p', { class: 'rs-checkbox-title', text: 'I have no middle name' }))
+  );
+  function toggleNoMiddle() {
+    const checked = noMiddleMark.classList.toggle('is-checked');
+    noMiddleRow.setAttribute('aria-checked', String(checked));
+    middleNameInput.disabled = checked;
+    middleNameInput.value = checked ? '' : middleNameInput.value;
+    middleNameInput.placeholder = checked ? "You've said you have no middle name" : 'Middle name';
+  }
+  noMiddleRow.addEventListener('click', toggleNoMiddle);
+  noMiddleRow.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleNoMiddle(); } });
+
+  const scrollEl = h('div', { class: 'rs-scroll' },
+    stepHeader({ title: '789 Birch Blvd, Unit 8', step: 1, total: 4 }),
+    h('div', { class: 'rs-page-head' },
+      h('h1', { class: 'rs-h1', text: 'Your details' }),
+      h('p', { class: 'rs-subtitle', text: 'Use your legal name so we can match it to your ID.' })
+    ),
+    h('div', { class: 'rs-form-fields' },
+      h('input', { type: 'text', placeholder: 'First name', autocomplete: 'off' }),
+      middleNameInput,
+      h('div', { class: 'rs-form-checkbox-row' }, noMiddleRow),
+      h('input', { type: 'text', placeholder: 'Last name', autocomplete: 'off' }),
+      fieldWithIcon('Date of birth', Icon.calendar),
+      fieldWithIcon('Phone number', Icon.phone, { type: 'tel' }),
+      fieldWithIcon('Email', Icon.envelope, { type: 'email' })
+    )
+  );
+
+  return h('div', { class: 'product' },
+    statusBar(),
+    scrollEl,
+    h('div', { class: 'rs-bottom-bar' },
+      h('button', { class: 'rs-btn-primary', text: 'Continue' })
+    ),
+    scrollTopControl(scrollEl)
+  );
+}
+
+/* ── Exposed as plain globals, matching the rest of the codebase ────────── */
+window.RSScreens = { applicationsList, overview, household, review, payment, yourDetails };

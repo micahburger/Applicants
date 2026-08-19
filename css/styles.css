@@ -1,0 +1,543 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Manrope:wght@400;500;600;700&display=swap');
+
+/* ============================================================================
+   APPLICANTS — design tokens
+   Real CSS custom properties, not JS objects — unlike lattice2026, this page
+   never swaps palettes at runtime, so the tokens can live where they belong.
+
+   TWO REGISTERS. They must not bleed into each other:
+     --page-*  the portfolio voice. Everything that's Micah talking: hero,
+               headings, body, nav, captions, notes, device bezels, footer.
+     --rs-*    RentSpree, the product being shown. Scoped under `.product`,
+               applied only to the device-viewport contents. Never reference
+               --rs-* outside `.product`, never reference --page-* inside it.
+   No lint config enforces this yet — this comment is the enforcement.
+   ============================================================================ */
+
+:root {
+  /* ── Portfolio register — inherited from lattice2026's Graphite Night
+     atmosphere + contemporary type system. This is the hand. ───────────── */
+  --page-bg:      #111111;
+  --page-surface: #1D1D1D;
+  --page-fg:      #F4F1EC;
+  --page-soft:    #D0C9C1;
+  --page-muted:   #B7B0A8;
+  --page-rule:    #303030;
+  --page-accent:  #9C8B70; /* the one warm note — don't add another */
+
+  /* ── Type — contemporary system, ported verbatim from lattice's data.js ── */
+  --font-heading: 'Instrument Sans', system-ui, sans-serif;
+  --font-body:    'Inter', 'Helvetica Neue', sans-serif; /* contemporary.body in lattice's data.js */
+  --font-label:   'IBM Plex Mono', 'Courier New', monospace;
+
+  --size-display: clamp(30px, 3.6vw, 54px);
+  --line-display: 1.04;
+  --weight-display: 600;
+
+  --size-heading: clamp(18px, 1.8vw, 26px);
+  --line-heading: 1.12;
+  --weight-heading: 600;
+
+  --size-body: 15px;
+  --line-body: 1.65;
+
+  --size-label: 10px;
+  --weight-label: 400;
+  --tracking-label: 0.14em; /* deliberate: lattice's own contemporary label is
+    0em/no-transform in data.js, but this page's eyebrows/captions/numbering
+    need to read as labels at a glance, so this is uppercase + wide tracking
+    per direction, not a strict port. Flagged in the report back. */
+
+  /* ── Motion — lattice's two curves, nothing else ─────────────────────── */
+  --ease-enter: cubic-bezier(.22, 1, .36, 1);
+  --ease-exit:  cubic-bezier(.4, 0, 1, 1);
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 250ms;
+
+  /* ── Radii — 8–20px band, same as lattice's chrome ───────────────────── */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+
+  /* ── Shadows — lattice's actual layered values, reused verbatim ──────── */
+  --shadow-sm: 0 8px 30px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 20px 60px rgba(0, 0, 0, 0.32);
+  --shadow-lg: 0 30px 80px rgba(0, 0, 0, 0.4);
+
+  /* ── Layout — the deliberate break from lattice's edge-to-edge canvas ── */
+  --content-max: 1080px;
+  --gutter: clamp(20px, 6vw, 48px);
+  --space-section: clamp(64px, 10vw, 120px);
+}
+
+/* ── RentSpree register — the product being demoed. Scoped to `.product`
+   on the device-viewport element. Nowhere else. ─────────────────────────── */
+.product {
+  --rs-ink:    #1A1A18;
+  --rs-bone:   #F5F1EE; /* pixel-sampled off refs/ exports 08-19 — was #F2EEE7, an eyeball guess */
+  --rs-paper:  #FFFFFF;
+  --rs-moss:   #7C9142;
+  --rs-mint:   #C4E9D2;
+  --rs-signal: #3B5BDB;
+  /* Proposed 7th token, not in the original 6 — the applications-list property
+     cards render as a third neutral, visibly darker than --rs-paper and
+     visibly grayer than --rs-bone. Neither existing token matches without
+     looking wrong. Named to match the moss/mint/bone pattern; flagged in the
+     report back rather than silently folded into --rs-paper. */
+  --rs-fog:    #ECE8DF; /* pixel-sampled, confirms the earlier eyeballed guess almost exactly */
+
+  /* New from the 08-19 refs — a pale blue fill for a selected radio row.
+     Pixel-sampled at #D7E5FF; roughly a ~20% tint of --rs-signal over white,
+     but close enough only in spirit — kept as its own literal token rather
+     than a computed tint so it matches the export exactly. */
+  --rs-signal-tint: #D7E5FF;
+
+  --rs-font-heading: 'Newsreader', Georgia, serif;
+  --rs-font-body:    'Manrope', system-ui, sans-serif;
+
+  /* Layout/color for the scope element itself lives here too, not in
+     product.css — a bare `.product { }` selector declared separately in two
+     stylesheets was silently losing its second declaration in this browser's
+     rendering (full rule dropped from the parsed CSSOM, cause unconfirmed).
+     One rule, one place, no collision possible. */
+  width: 390px;
+  height: 844px;
+  position: relative; /* anchors .rs-scroll-top to the screen, not the page */
+  display: flex;
+  flex-direction: column;
+  background: var(--rs-bone);
+  color: var(--rs-ink);
+  font-family: var(--rs-font-body);
+  font-size: 15px;
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+/* ── Reset ────────────────────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--page-bg);
+  color: var(--page-fg);
+  font-family: var(--font-body);
+  font-size: var(--size-body);
+  line-height: var(--line-body);
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Type scale — contemporary, portfolio register only ──────────────────
+   Hero is the one deliberate exception (exceeds --size-display) — deferred
+   until the hero content/copy exists; see the report back for why. ──────── */
+.display {
+  font-family: var(--font-heading);
+  font-size: var(--size-display);
+  line-height: var(--line-display);
+  font-weight: var(--weight-display);
+  color: var(--page-fg);
+  margin: 0;
+}
+.heading {
+  font-family: var(--font-heading);
+  font-size: var(--size-heading);
+  line-height: var(--line-heading);
+  font-weight: var(--weight-heading);
+  color: var(--page-fg);
+  margin: 0;
+}
+.text-body { font-family: var(--font-body); font-size: var(--size-body); line-height: var(--line-body); color: var(--page-fg); margin: 0; }
+.text-soft { color: var(--page-soft); }
+.text-muted { color: var(--page-muted); } /* captions & labels only — see contrast note */
+.label {
+  font-family: var(--font-label);
+  font-size: var(--size-label);
+  font-weight: var(--weight-label);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  color: var(--page-muted);
+  margin: 0;
+}
+
+/* ── Accent discipline ─────────────────────────────────────────────────────
+   --page-accent is restricted to large-scale marks: pull lines, section
+   numerals, the active nav mark, the live-phone outline. Never body text,
+   never anything under 18px — enforced by convention, not by a lint rule. */
+.pull-line {
+  font-family: var(--font-heading);
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.15;
+  font-weight: var(--weight-display);
+  color: var(--page-accent);
+  margin: 0;
+}
+.section-number {
+  font-family: var(--font-label);
+  font-size: 20px;
+  letter-spacing: var(--tracking-label);
+  color: var(--page-accent);
+}
+.nav-mark.active { color: var(--page-accent); }
+
+/* ── Reading column — 1080px max-width with real gutters ─────────────────
+   Deliberate break from lattice's full-bleed, no-max-width canvas. ──────── */
+.wrap {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+section {
+  padding-top: var(--space-section);
+  padding-bottom: var(--space-section);
+}
+/* #hero manages its own vertical rhythm via .title's min-height:100vh +
+   padding — stacking the generic section padding on top of that made the
+   hero ~1.5x a viewport tall, pushing the last two lines and the scroll
+   cue below the fold on load. */
+#hero {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* ── Device frame / bezel ─────────────────────────────────────────────────
+   Bezel goes lighter than the page, not darker: a black bezel would merge
+   into #111111 and the phone would read as a floating rectangle instead of
+   a lit panel. --page-surface + a 1px --page-rule edge keeps the frame
+   legible against the page while still reading as part of the dark register. */
+.device-frame {
+  display: inline-block;
+  background: var(--page-surface);
+  border: 1px solid var(--page-rule);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  box-shadow: var(--shadow-md);
+}
+.device-frame .screen {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  line-height: 0;
+}
+.device-frame.is-live {
+  outline: 2px solid var(--page-accent);
+  outline-offset: 4px;
+  border-radius: calc(var(--radius-lg) + 2px);
+}
+
+/* ── Hero — character-scramble stack ──────────────────────────────────────
+   No field of its own (the page is already #111111) — weight comes from
+   scale and emptiness. SplitText/scramble wiring lives in js/hero.js. ────── */
+.title {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: crosshair;
+  text-align: center;
+  padding: var(--space-section) var(--gutter);
+}
+.title h1 {
+  font-family: var(--font-heading);
+  font-size: 7.5vw;
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  width: 80%;
+  margin: 0 auto;
+  color: var(--page-fg);
+}
+.title h1.title-stanza { margin-top: 0.35em; } /* the blank-line break between the two stanzas of hero copy */
+.title .char { position: relative; display: inline-block; }
+.title .detail-size {
+  position: absolute;
+  left: 0;
+  bottom: -14px;
+  height: 1px;
+  line-height: 1;
+  font-family: var(--font-label);
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--page-accent);
+  pointer-events: none;
+}
+.scroll-cue { margin-top: 40px; }
+
+/* ============================================================================
+   SHELL — 8-section scroll structure, sticky bar, pill nav, keyboard nav,
+   scroll-triggered reveal. Wiring lives in js/shell.js.
+   ============================================================================ */
+
+html {
+  scroll-padding-top: 56px; /* sticky bar height, so the chapter-jumper's target isn't hidden under it */
+}
+
+/* ── Reveal-on-scroll — one fade+rise per section, fires once ────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .4s var(--ease-enter), transform .4s var(--ease-enter);
+}
+.reveal.is-visible { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* ── Sticky hairline bar — hidden while #hero is in view ─────────────────── */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 var(--gutter);
+  border-bottom: 1px solid var(--page-rule);
+  background: rgba(17, 17, 17, 0.86);
+  backdrop-filter: blur(6px);
+  font-family: var(--font-label);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--page-muted);
+  opacity: 0;
+  transform: translateY(-100%);
+  transition: opacity var(--duration-base) var(--ease-enter), transform var(--duration-base) var(--ease-enter);
+  pointer-events: none;
+}
+.top-bar.is-visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.top-bar .top-bar-section { color: var(--page-soft); }
+
+/* ── Pill nav — collapsed pill + plain jump list, lattice's curves ───────── */
+.section-pill {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--page-rule);
+  background: rgba(29, 29, 29, 0.92);
+  backdrop-filter: blur(6px);
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-family: var(--font-label);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--page-fg);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--duration-base) ease;
+}
+.section-pill:hover { background: rgba(40, 40, 40, 0.95); }
+.section-pill:focus-visible { outline: 2px solid var(--page-accent); outline-offset: 2px; }
+.section-pill .pill-count { color: var(--page-accent); font-weight: 600; }
+.section-pill .pill-sep { color: var(--page-rule); }
+
+.section-jumplist {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 40;
+  width: min(260px, calc(100vw - 40px));
+  background: var(--page-surface);
+  border: 1px solid var(--page-rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 8px;
+  animation: pillListIn var(--duration-slow) var(--ease-enter);
+}
+.section-jumplist.is-closing { animation: pillListOut var(--duration-fast) var(--ease-exit) forwards; }
+@keyframes pillListIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pillListOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(12px); } }
+.section-jumplist button {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-label);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  color: var(--page-soft);
+  cursor: pointer;
+  transition: background-color .15s ease, color .15s ease;
+}
+.section-jumplist button .jump-n { color: var(--page-muted); flex-shrink: 0; }
+.section-jumplist button:hover { background: rgba(255, 255, 255, 0.05); color: var(--page-fg); }
+.section-jumplist button.active { color: var(--page-accent); }
+.section-jumplist button.active .jump-n { color: var(--page-accent); }
+.section-jumplist button:focus-visible { outline: 2px solid var(--page-accent); outline-offset: -2px; }
+
+/* ── Section content patterns ──────────────────────────────────────────── */
+.eyebrow { display: none; }
+.section-headline { margin: 0 0 20px; max-width: 780px; }
+.section-body { font-family: var(--font-body); font-size: 15px; line-height: 1.75; color: var(--page-soft); max-width: 620px; margin: 0; }
+.section-body + .section-body { margin-top: 16px; }
+
+.split { display: grid; grid-template-columns: 1fr; gap: 48px; align-items: start; }
+@media (min-width: 1000px) { .split { grid-template-columns: 1fr 1fr; gap: 64px; } }
+.split-visual { display: flex; justify-content: center; }
+@media (min-width: 1000px) {
+  .split-visual { justify-content: flex-start; align-items: flex-end; padding-top: 10vh; }
+}
+
+.moment { padding: 40px 0; }
+.moment:first-of-type { padding-top: 0; }
+.moment-heading {
+  font-family: var(--font-label); font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--page-muted); margin: 0 0 24px;
+}
+.moment-layout { display: grid; grid-template-columns: 1fr; gap: 40px; align-items: start; }
+@media (min-width: 1000px) { .moment-layout { grid-template-columns: auto 1fr; gap: 64px; } }
+.moment-hairline { border-top: 1px solid var(--page-rule); margin: 8px 0 0; }
+
+.notes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; max-width: 360px; }
+.notes li { display: flex; gap: 14px; font-family: var(--font-body); font-size: 13px; line-height: 1.75; color: var(--page-soft); }
+.notes .n { font-family: var(--font-label); font-size: 12px; color: var(--page-muted); flex-shrink: 0; width: 16px; padding-top: 1px; }
+
+/* ── Diagnosis — the one earned numbered list ─────────────────────────── */
+.diagnosis-list { max-width: 720px; }
+.diagnosis-item { display: flex; gap: 24px; padding: 28px 0; border-top: 1px solid var(--page-rule); }
+.diagnosis-item:first-child { border-top: none; padding-top: 4px; }
+.diagnosis-item .num {
+  font-family: var(--font-label); font-size: 20px; color: var(--page-accent); flex-shrink: 0; width: 36px; line-height: 1.3;
+}
+.diagnosis-item h3 { font-family: var(--font-heading); font-weight: 600; font-size: 19px; color: var(--page-fg); margin: 0 0 8px; }
+.diagnosis-item p { font-family: var(--font-body); font-size: 14px; line-height: 1.75; color: var(--page-soft); margin: 0; }
+
+/* ── Pull line / pull quote ────────────────────────────────────────────── */
+.pull-quote {
+  font-family: var(--font-heading); font-weight: 500; font-size: clamp(26px, 4.2vw, 46px);
+  line-height: 1.28; color: var(--page-accent); margin: 0; max-width: 780px;
+}
+
+/* ── Divider strip — small type, no heading ───────────────────────────────
+   Was --page-accent at 13px — a full paragraph of body copy, which is
+   exactly what the accent-discipline rule above rules out (never body
+   text, never under 18px). Swapped to --page-soft, same register as
+   .section-body. */
+.divider-strip {
+  border-top: 1px solid var(--page-rule); border-bottom: 1px solid var(--page-rule);
+  padding: 28px 0; margin: 8px 0;
+}
+.divider-strip p {
+  font-family: var(--font-body); font-size: 13px; line-height: 1.75; color: var(--page-soft);
+  max-width: 680px; margin: 0;
+}
+
+/* ── Closing card ──────────────────────────────────────────────────────── */
+.closing-card {
+  background: var(--page-surface); border: 1px solid var(--page-rule); border-radius: var(--radius-lg);
+  padding: 32px; max-width: 620px;
+}
+.closing-card p { font-family: var(--font-body); font-size: 14px; line-height: 1.8; color: var(--page-soft); margin: 0; }
+
+.still-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; max-width: 640px; }
+.still-list li { font-family: var(--font-body); font-size: 14px; line-height: 1.7; color: var(--page-soft); padding-left: 20px; position: relative; }
+.still-list li::before { content: '—'; position: absolute; left: 0; color: var(--page-muted); }
+
+/* ── Footer ────────────────────────────────────────────────────────────── */
+.site-footer {
+  display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; align-items: baseline;
+  padding: 40px var(--gutter) 96px; border-top: 1px solid var(--page-rule);
+  font-family: var(--font-label); font-size: 11px; letter-spacing: 0.06em; color: var(--page-muted);
+}
+.site-footer a { color: var(--page-soft); text-decoration: underline; text-underline-offset: 3px; }
+.site-footer a:hover { color: var(--page-fg); }
+.site-footer a:focus-visible { outline: 2px solid var(--page-accent); outline-offset: 3px; }
+
+/* ============================================================================
+   PHONE / STILL — device components for js/phone.js. Bezel is portfolio
+   chrome (--page-*); the mounted screen inside is .product-scoped (--rs-*).
+   ============================================================================ */
+
+.phone-row { display: flex; flex-direction: column; gap: 40px; align-items: center; }
+@media (min-width: 1000px) { .phone-row { flex-direction: row; justify-content: center; align-items: flex-start; } }
+
+/* min-width: 0 overrides the grid/flex default of min-width: auto — without
+   it, a moment-layout grid track won't shrink below the phone-frame's
+   min-content size (the .product's hard-coded 390px), so at narrow
+   viewports the frame blows out past its column and the whole page gains
+   ~50px of horizontal scroll. Found by measuring document.scrollWidth vs
+   window.innerWidth at 390px — they didn't match. */
+.phone-figure, .still-figure { display: flex; flex-direction: column; align-items: center; gap: 16px; min-width: 0; }
+
+.phone-frame, .still-frame {
+  background: var(--page-surface);
+  border: 1px solid var(--page-rule);
+  border-radius: 40px;
+  padding: 12px;
+  box-shadow: var(--shadow-lg);
+  display: inline-block;
+  position: relative;
+  max-width: 100%;
+  transition: outline-color .15s ease;
+  /* `zoom` (not transform:scale) so the shrunk frame's layout box actually
+     shrinks too — a still-mount doesn't leave a phantom 414px gap the way a
+     scale() transform would. Responsive term shrinks the full-size frame
+     (416px including bezel) to fit whatever width .wrap's gutters leave;
+     min(1, …) is a no-op once there's room for it at full size. */
+  --frame-fit: min(1, calc((100vw - 2 * var(--gutter)) / 416px));
+  zoom: var(--frame-fit);
+}
+.phone-frame.is-live { outline: 2px solid var(--page-accent); outline-offset: 4px; }
+/* ~300px per the thesis visual's spec, compounded with the responsive fit
+   above so the small still shrinks further too if the viewport is tight. */
+.frame--sm { zoom: calc(0.72 * var(--frame-fit)); }
+.phone-screen-wrap, .still-screen-wrap {
+  border-radius: 28px;
+  overflow: hidden;
+  position: relative;
+  line-height: 0;
+  max-width: 100%;
+}
+.phone-screen-wrap .product, .still-screen-wrap .product { transition: opacity var(--duration-fast) ease; }
+.still-screen-wrap .product { pointer-events: none; }
+
+.phone-activate-overlay {
+  position: absolute; inset: 0; z-index: 4; border-radius: inherit;
+  background: transparent; border: none; padding: 0; margin: 0; cursor: pointer;
+}
+.phone-activate-overlay:focus-visible { outline: 2px solid var(--page-accent); outline-offset: -4px; }
+.phone-frame.is-live .phone-activate-overlay { display: none; }
+
+.phone-caption, .still-caption {
+  font-family: var(--font-body); font-size: 13px; line-height: 1.6; color: var(--page-soft);
+  text-align: center; max-width: 340px; margin: 0;
+}
+
+.phone-controls { display: flex; align-items: center; gap: 14px; }
+.phone-reset {
+  background: none; border: none; padding: 4px 8px;
+  font-family: var(--font-label); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--page-muted); cursor: pointer; transition: color .15s ease;
+}
+.phone-reset:hover { color: var(--page-fg); }
+.phone-reset:focus-visible { outline: 2px solid var(--page-accent); outline-offset: 2px; }
+
+.phone-states {
+  display: flex; gap: 3px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--page-rule);
+  border-radius: 999px; padding: 3px;
+}
+.phone-states button {
+  border: none; background: none; padding: 6px 14px; border-radius: 999px;
+  font-family: var(--font-label); font-size: 11px; letter-spacing: 0.03em; color: var(--page-muted);
+  cursor: pointer; transition: background-color .15s ease, color .15s ease;
+}
+.phone-states button.active { background: var(--page-fg); color: var(--page-bg); }
+.phone-states button:focus-visible { outline: 2px solid var(--page-accent); outline-offset: 2px; }

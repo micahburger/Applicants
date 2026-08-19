@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Screens — Applicants</title>
+<link rel="stylesheet" href="../css/styles.css" />
+<link rel="stylesheet" href="../css/product.css" />
+<style>
+  /* Test-harness-only layout — not part of either register's component set. */
+  body { padding: 48px; }
+  .sg-rail { display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start; }
+  .sg-cell { display: flex; flex-direction: column; gap: 16px; align-items: center; }
+  .sg-cell .label { text-align: center; }
+</style>
+</head>
+<body>
+  <p class="label" style="margin-bottom: 32px;">Screens — standalone, real size (390 × 844). Not yet in device frames.</p>
+  <div class="sg-rail" id="rail"></div>
+
+  <script src="../js/screens.js"></script>
+  <script>
+    const rail = document.getElementById('rail');
+    function mount(labelText, node) {
+      node.classList.add('standalone');
+      const cell = document.createElement('div');
+      cell.className = 'sg-cell';
+      const label = document.createElement('p');
+      label.className = 'label';
+      label.textContent = labelText;
+      cell.appendChild(label);
+      cell.appendChild(node);
+      rail.appendChild(cell);
+    }
+    mount('1 — applications-list', RSScreens.applicationsList());
+    mount('2 — overview (fresh)', RSScreens.overview('fresh'));
+    mount('2 — overview (resumed)', RSScreens.overview('resumed'));
+    mount('3 — household', RSScreens.household());
+    mount('4 — review', RSScreens.review());
+    mount('5 — payment', RSScreens.payment());
+    mount('6 — your-details', RSScreens.yourDetails());
+  </script>
+</body>
+</html>

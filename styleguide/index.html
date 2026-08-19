@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Styleguide — Applicants</title>
+<link rel="stylesheet" href="../css/styles.css" />
+<style>
+  /* Styleguide-only presentation chrome — not part of the token system. */
+  .sg-section { border-top: 1px solid var(--page-rule); }
+  .sg-section:first-of-type { border-top: none; }
+  .sg-kicker { text-transform: uppercase; }
+  .sg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-top: 24px; }
+  .sg-swatch { border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--page-rule); }
+  .sg-swatch-color { height: 72px; }
+  .sg-swatch-meta { padding: 10px 12px; background: var(--page-surface); }
+  .sg-swatch-meta .name { font-family: var(--font-label); font-size: 11px; letter-spacing: 0.06em; color: var(--page-fg); margin-bottom: 2px; }
+  .sg-swatch-meta .hex { font-family: var(--font-label); font-size: 10px; color: var(--page-muted); }
+  .sg-type-row { display: flex; align-items: baseline; gap: 24px; padding: 20px 0; border-top: 1px solid var(--page-rule); }
+  .sg-type-row:first-of-type { border-top: none; }
+  .sg-type-row .meta { flex-shrink: 0; width: 190px; font-family: var(--font-label); font-size: 10px; color: var(--page-muted); line-height: 1.5; }
+  .sg-motion-row { display: flex; gap: 20px; align-items: center; margin-top: 20px; flex-wrap: wrap; }
+  .sg-motion-chip {
+    width: 120px; height: 44px; border-radius: var(--radius-sm);
+    background: var(--page-surface); border: 1px solid var(--page-rule);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-label); font-size: 10px; color: var(--page-soft);
+    cursor: pointer; transform: translateY(0);
+  }
+  .sg-motion-chip.enter { transition: transform var(--duration-slow) var(--ease-enter); }
+  .sg-motion-chip.exit { transition: transform var(--duration-fast) var(--ease-exit); }
+  .sg-motion-chip:hover { transform: translateY(-6px); }
+  .sg-shadow-row { display: flex; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+  .sg-shadow-chip {
+    width: 140px; height: 90px; border-radius: var(--radius-md);
+    background: var(--page-surface); display: flex; align-items: flex-end;
+    padding: 10px; font-family: var(--font-label); font-size: 10px; color: var(--page-muted);
+  }
+  .sg-contrast-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-family: var(--font-label); font-size: 12px; }
+  .sg-contrast-table th, .sg-contrast-table td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--page-rule); }
+  .sg-contrast-table th { color: var(--page-muted); font-weight: 400; text-transform: uppercase; letter-spacing: 0.08em; font-size: 10px; }
+  .sg-pass { color: var(--rs-moss, #8FAE5A); }
+  .sg-note { color: var(--page-muted); font-family: var(--font-body); font-size: 13px; line-height: 1.6; margin-top: 20px; max-width: 640px; }
+
+  /* Placeholder RentSpree screen mock — swap for a real screenshot in
+     /screens once one exists. Built entirely from --rs-* tokens to prove
+     the scoping: these values do not exist outside .product. */
+  .screen-mock { width: 260px; background: var(--rs-bone); font-family: var(--font-body); }
+  .screen-mock .bar { background: var(--rs-moss); color: var(--rs-paper); padding: 14px 16px; font-size: 13px; font-weight: 600; }
+  .screen-mock .card { background: var(--rs-paper); margin: 16px; padding: 16px; border-radius: 10px; }
+  .screen-mock .card h4 { font-family: Georgia, serif; margin: 0 0 6px; color: var(--rs-ink); font-size: 16px; }
+  .screen-mock .card p { margin: 0 0 12px; color: var(--rs-ink); font-size: 12px; opacity: 0.7; }
+  .screen-mock .card .pill { display: inline-block; background: var(--rs-mint); color: var(--rs-ink); font-size: 10px; padding: 4px 10px; border-radius: 999px; margin-bottom: 12px; }
+  .screen-mock .card button { background: var(--rs-signal); color: var(--rs-paper); border: none; border-radius: 8px; padding: 10px 14px; font-size: 12px; font-family: inherit; width: 100%; }
+  .screen-mock .placeholder-tag { text-align: center; padding: 10px; font-family: var(--font-label); font-size: 9px; letter-spacing: 0.08em; color: var(--rs-ink); opacity: 0.5; text-transform: uppercase; }
+</style>
+</head>
+<body>
+  <main class="wrap">
+
+    <section class="sg-section" style="padding-top: var(--space-section);">
+      <p class="label">Styleguide</p>
+      <h1 class="display">Two registers, one page.</h1>
+      <p class="text-body text-soft" style="margin-top: 16px; max-width: 560px;">
+        Everything under <strong>Portfolio</strong> is Micah talking — hero, headings, body,
+        nav, notes, device bezels. Everything under <strong>RentSpree</strong> is the product
+        being shown, and only exists inside a <code>.product</code>-scoped device viewport.
+      </p>
+    </section>
+
+    <!-- ── Portfolio register ────────────────────────────────────────── -->
+    <section class="sg-section">
+      <p class="label sg-kicker">Portfolio — dark register</p>
+      <h2 class="heading" style="margin-top: 10px;">--page-*</h2>
+      <p class="text-body text-muted" style="margin-top: 8px;">Inherited from lattice2026's Graphite Night atmosphere. Owns everything that's Micah talking.</p>
+
+      <div class="sg-grid">
+        <div class="sg-swatch"><div class="sg-swatch-color" style="background:#111111;"></div><div class="sg-swatch-meta"><div class="name">--page-bg</div><div class="hex">#111111</div></div></div>
+        <div class="sg-swatch"><div class="sg-swatch-color" style="background:#1D1D1D;"></div><div class="sg-swatch-meta"><div class="name">--page-surface</div><div class="hex">#1D1D1D</div></div></div>
+        <div class="sg-swatch"><div class="sg-swatch-color" style="background:#F4F1EC;"></div><div class="sg-swatch-meta"><div class="name">--page-fg</div><div class="hex">#F4F1EC</div></div></div>
+        <div class="sg-swatch"><div class="sg-swatch-color" style="background:#D0C9C1;"></div><div class="sg-swatch-meta"><div class="name">--page-soft</div><div class="hex">#D0C9C1</div></div></div>
+        <div class="sg-swatch"><div class="sg-swatch-color" style="background:#B7B0A8;"></div><div class="sg-swatch-meta"><div class="name">--page-muted</div><div class="hex">#B7B0A8</div></div></div>
+        <div class="sg-swatch"><div class="sg-swatch-color" style="background:#303030;"></div><div class="sg-swatch-meta"><div class="name">--page-rule</div><div class="hex">#303030</div></div></div>
+        <div class="sg-swatch"><div class="sg-swatch-color" style="background:#9C8B70;"></div><div class="sg-swatch-meta"><div class="name">--page-accent</div><div class="hex">#9C8B70</div></div></div>
+      </div>
+    </section>
+
+    <!-- ── Type ──────────────────────────────────────────────────────── -->
+    <section class="sg-section">
+      <p class="label sg-kicker">Type — contemporary system</p>
+      <div class="sg-type-row">
+        <div class="meta">display<br/>clamp(30,3.6vw,54)/1.04<br/>Instrument Sans 600</div>
+        <div class="display">Aa Applicant flow</div>
+      </div>
+      <div class="sg-type-row">
+        <div class="meta">heading<br/>clamp(18,1.8vw,26)/1.12<br/>Instrument Sans 600</div>
+        <div class="heading">A section heading reads like this</div>
+      </div>
+      <div class="sg-type-row">
+        <div class="meta">body<br/>15px/1.65<br/>Inter 400</div>
+        <p class="text-body">Body copy sits on --page-fg at full contrast. This is the register doing the talking — narration, captions, the walkthrough itself.</p>
+      </div>
+      <div class="sg-type-row">
+        <div class="meta">label<br/>10px, uppercase, wide tracking<br/>IBM Plex Mono 400</div>
+        <p class="label">Eyebrow / caption / phone annotation</p>
+      </div>
+      <p class="sg-note">
+        Note: lattice's own contemporary label spec is 0em tracking, no uppercase — this page uses uppercase + wide tracking
+        for labels/eyebrows/numbering instead, per direction. Flagging the divergence rather than silently porting it.
+      </p>
+    </section>
+
+    <!-- ── Accent discipline ─────────────────────────────────────────── -->
+    <section class="sg-section">
+      <p class="label sg-kicker">Accent — large-scale only</p>
+      <p class="section-number" style="margin-top: 16px;">01</p>
+      <p class="pull-line" style="margin-top: 10px;">The one warm note in the room.</p>
+      <p class="text-body text-muted" style="margin-top: 14px; max-width: 560px;">
+        Reserved for pull lines, section numerals, the active nav mark, and the live-phone outline (below).
+        Never used for body-size text.
+      </p>
+    </section>
+
+    <!-- ── Motion ────────────────────────────────────────────────────── -->
+    <section class="sg-section">
+      <p class="label sg-kicker">Motion — lattice's two curves</p>
+      <p class="text-body text-muted" style="margin-top: 10px;">Hover each chip. 150–250ms, nothing bouncy.</p>
+      <div class="sg-motion-row">
+        <div class="sg-motion-chip enter">enter · .22,1,.36,1</div>
+        <div class="sg-motion-chip exit">exit · .4,0,1,1</div>
+      </div>
+    </section>
+
+    <!-- ── Radii & shadow ────────────────────────────────────────────── -->
+    <section class="sg-section">
+      <p class="label sg-kicker">Radii &amp; shadow</p>
+      <div class="sg-shadow-row">
+        <div class="sg-shadow-chip" style="border-radius: var(--radius-sm); box-shadow: var(--shadow-sm);">radius-sm / shadow-sm</div>
+        <div class="sg-shadow-chip" style="border-radius: var(--radius-md); box-shadow: var(--shadow-md);">radius-md / shadow-md</div>
+        <div class="sg-shadow-chip" style="border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);">radius-lg / shadow-lg</div>
+      </div>
+    </section>
+
+    <!-- ── Contrast check ────────────────────────────────────────────── -->
+    <section class="sg-section">
+      <p class="label sg-kicker">Contrast check</p>
+      <table class="sg-contrast-table">
+        <thead><tr><th>Pair</th><th>Ratio</th><th>Body-size AA (4.5:1)</th></tr></thead>
+        <tbody>
+          <tr><td>--page-fg on --page-bg</td><td>16.76:1</td><td class="sg-pass">Pass</td></tr>
+          <tr><td>--page-fg on --page-surface</td><td>14.96:1</td><td class="sg-pass">Pass</td></tr>
+          <tr><td>--page-soft on --page-bg</td><td>11.52:1</td><td class="sg-pass">Pass</td></tr>
+          <tr><td>--page-soft on --page-surface</td><td>10.28:1</td><td class="sg-pass">Pass</td></tr>
+          <tr><td>--page-muted on --page-bg</td><td>8.80:1</td><td class="sg-pass">Pass</td></tr>
+          <tr><td>--page-muted on --page-surface</td><td>7.86:1</td><td class="sg-pass">Pass</td></tr>
+          <tr><td>--page-accent on --page-bg</td><td>5.70:1</td><td class="sg-pass">Pass (see note)</td></tr>
+          <tr><td>--page-accent on --page-surface</td><td>5.09:1</td><td class="sg-pass">Pass (see note)</td></tr>
+        </tbody>
+      </table>
+      <p class="sg-note">
+        Nothing in this palette fails 4.5:1 at body size — including accent, which measures 5.70:1 on --page-bg and 5.09:1
+        on --page-surface, both above the AA threshold. The restriction to large-scale use (pull lines, numerals, nav mark,
+        live-phone outline; never under 18px) is a hierarchy decision, not a contrast failure — flagging that the math and
+        the stated assumption diverge, in case that changes how tightly you want it enforced.
+      </p>
+    </section>
+
+    <!-- ── RentSpree register ────────────────────────────────────────── -->
+    <section class="sg-section">
+      <p class="label sg-kicker">RentSpree — product register, scoped to .product</p>
+      <p class="text-body text-muted" style="margin-top: 8px; max-width: 560px;">
+        These tokens are inert outside a <code>.product</code> element — the swatches below only render because this
+        block is wrapped in one.
+      </p>
+      <div class="product">
+        <div class="sg-grid">
+          <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--rs-ink);"></div><div class="sg-swatch-meta"><div class="name">--rs-ink</div><div class="hex">#1A1A18</div></div></div>
+          <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--rs-bone);"></div><div class="sg-swatch-meta"><div class="name">--rs-bone</div><div class="hex">#F2EEE7</div></div></div>
+          <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--rs-paper); border-color: var(--page-rule);"></div><div class="sg-swatch-meta"><div class="name">--rs-paper</div><div class="hex">#FFFFFF</div></div></div>
+          <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--rs-moss);"></div><div class="sg-swatch-meta"><div class="name">--rs-moss</div><div class="hex">#7C9142</div></div></div>
+          <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--rs-mint);"></div><div class="sg-swatch-meta"><div class="name">--rs-mint</div><div class="hex">#C4E9D2</div></div></div>
+          <div class="sg-swatch"><div class="sg-swatch-color" style="background:var(--rs-signal);"></div><div class="sg-swatch-meta"><div class="name">--rs-signal</div><div class="hex">#3B5BDB</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Device frame on the real page background ─────────────────── -->
+    <section class="sg-section" style="padding-bottom: var(--space-section);">
+      <p class="label sg-kicker">Device frame — on the real page background</p>
+      <p class="text-body text-muted" style="margin-top: 8px; max-width: 560px;">
+        Bezel is --page-surface with a 1px --page-rule edge, not black — a black bezel would merge into --page-bg and the
+        screen would float with no frame. The accent outline below marks a "live" frame — one the presenter can click
+        through — versus a plain static screenshot.
+      </p>
+      <div class="sg-motion-row" style="align-items: flex-start;">
+        <div class="device-frame">
+          <div class="product screen">
+            <div class="screen-mock">
+              <div class="bar">RentSpree</div>
+              <div class="card">
+                <span class="pill">Application in progress</span>
+                <h4>1234 Maple Ave, Unit 2B</h4>
+                <p>Background check &amp; credit report pending</p>
+                <button>Continue application</button>
+              </div>
+              <div class="placeholder-tag">Placeholder — swap for a real screenshot in /screens</div>
+            </div>
+          </div>
+        </div>
+        <div class="device-frame is-live">
+          <div class="product screen">
+            <div class="screen-mock">
+              <div class="bar">RentSpree</div>
+              <div class="card">
+                <span class="pill">Live — click through</span>
+                <h4>Verify your income</h4>
+                <p>Upload pay stubs or connect your bank</p>
+                <button>Upload document</button>
+              </div>
+              <div class="placeholder-tag">Placeholder — is-live modifier</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>
