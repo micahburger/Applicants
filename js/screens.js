@@ -58,6 +58,10 @@ const Icon = {
   calendar: () => svg('<rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 9.5h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'),
   phone: () => svg('<path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.2 1L6.6 10.8z" fill="currentColor"/>'),
   envelope: () => svg('<rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M4 6.5l8 6 8-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'),
+  wallet: () => svg('<rect x="2" y="5" width="20" height="15" rx="3" stroke="currentColor" stroke-width="1.6"/><path d="M2 9.5h20" stroke="currentColor" stroke-width="1.6"/><rect x="14.5" y="13.5" width="5.5" height="3" rx="1" fill="currentColor"/>'),
+  lock: () => svg('<rect x="4" y="10" width="16" height="11" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 10V7a4.5 4.5 0 0 1 9 0v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'),
+  apple: () => svg('<path d="M15.6 3.8c.1 1-.3 2-.9 2.7-.7.8-1.8 1.4-2.8 1.3-.1-1 .4-2 1-2.7.7-.8 1.9-1.4 2.7-1.3zM18.9 17c-.5 1.1-.7 1.6-1.3 2.5-.9 1.4-2.1 3-3.6 3-1.3 0-1.7-.9-3.4-.9-1.8 0-2.2.9-3.4.9-1.5 0-2.6-1.5-3.5-2.9C1 15.8.6 11.1 2.3 8.7c1.2-1.7 3-2.7 4.7-2.7 1.7 0 2.8 1 4.2 1 1.4 0 2.2-1 4.2-1 1.5 0 3.1.8 4.2 2.3-3.7 2-3.1 7.3-.7 8.7z" fill="currentColor"/>'),
+  googlePay: () => svg('<circle cx="12" cy="12" r="10" fill="currentColor"/><text x="12" y="16.5" font-family="Manrope, system-ui, sans-serif" font-size="12" font-weight="700" text-anchor="middle" fill="var(--rs-paper)">G</text>', '0 0 24 24'),
 };
 
 function statusBar({ onHero } = {}) {
@@ -272,7 +276,7 @@ function household() {
   function addPet() {
     petCount += 1;
     const n = petCount;
-    const fields = h('div', {}, inputRow('Type / breed', 'e.g. Labrador retriever'), inputRow('Weight (lbs)', 'Optional'));
+    const fields = h('div', { class: 'rs-expand-panel-fields' }, inputRow('Type / breed', 'e.g. Labrador retriever'), inputRow('Weight (lbs)', 'Optional'));
     const panel = expandEntryPanel(`Pet ${n}`, fields, () => { panel.remove(); });
     petsList.appendChild(panel);
   }
@@ -283,16 +287,27 @@ function household() {
   const petsReveal = revealPanel(h('div', {}, petsList, addPetBtn));
   const petsRadio = radioYesNo(v => petsReveal._setOpen(v === true));
 
-  /* ── Additional tenants ────────────────────────────────────────────── */
-  const tenantFields = h('div', {},
-    inputRow('First name', ''),
-    inputRow('Last name', ''),
-    inputRow('Email or phone', ''),
-    h('p', { class: 'rs-expand-panel-helper', text: "We'll send them their own application link on submit." }),
-    inputRow('Tenants under 18', 'Optional', true)
-  );
-  const tenantPanel = expandEntryPanel('First additional tenant', tenantFields, null);
-  const tenantsReveal = revealPanel(tenantPanel);
+  /* ── Additional tenants — repeatable ─────────────────────────────────── */
+  const tenantsList = h('div', {});
+  let tenantCount = 0;
+  function addTenant() {
+    tenantCount += 1;
+    const n = tenantCount;
+    const fields = h('div', { class: 'rs-expand-panel-fields' },
+      inputRow('First name', ''),
+      inputRow('Last name', ''),
+      inputRow('Email or phone', ''),
+      h('p', { class: 'rs-expand-panel-helper', text: "We'll send them their own application link on submit." })
+    );
+    const label = n === 1 ? 'First additional tenant' : `Additional tenant ${n}`;
+    const panel = expandEntryPanel(label, fields, n === 1 ? null : () => { panel.remove(); });
+    tenantsList.appendChild(panel);
+  }
+  addTenant();
+  const addTenantBtn = h('button', { class: 'rs-add-row', type: 'button' }, Icon.plus(), h('span', { text: '+ additional tenant' }));
+  addTenantBtn.addEventListener('click', addTenant);
+
+  const tenantsReveal = revealPanel(h('div', {}, tenantsList, addTenantBtn));
   const tenantsRadio = radioYesNo(v => tenantsReveal._setOpen(v === true));
 
   scrollEl.append(
@@ -309,7 +324,7 @@ function household() {
     h('hr', { class: 'rs-field-divider' }),
     h('p', { class: 'rs-field-section-title', text: 'Additional tenants' }),
     h('div', { class: 'rs-field-group' },
-      h('p', { class: 'rs-field-helper', text: "List anyone 18 or over. For under 18, the count below is enough.", style: 'margin-top:-8px;' }),
+      h('p', { class: 'rs-field-helper', text: "List anyone 18 or over who will live here.", style: 'margin-top:-8px;' }),
       h('p', { class: 'rs-field-label', text: 'Will anyone else live here with you?', style: 'margin-top:14px;' }),
       tenantsRadio,
       tenantsReveal
@@ -334,6 +349,30 @@ function reviewRow(label, value) {
   return h('div', { class: 'rs-row' },
     h('span', { class: 'rs-row-label', text: label }),
     h('span', { class: 'rs-row-value', text: value })
+  );
+}
+
+/* Multi-line value, right-aligned — landlord contact info, employer + title. */
+function reviewRowStack(label, lines) {
+  return h('div', { class: 'rs-row' },
+    h('span', { class: 'rs-row-label', text: label }),
+    h('div', { class: 'rs-row-value rs-row-value--stack' }, lines.map(line => h('span', { text: line })))
+  );
+}
+
+/* Bare sub-heading inside a card's row list — "Pet 1", "Rental details" —
+   no value, just a stronger label. Falls into the same auto-divider rhythm
+   as every other .rs-row since it's still a first-class row. */
+function reviewSubhead(text) {
+  return h('div', { class: 'rs-row' }, h('span', { class: 'rs-row-label rs-row-label--strong', text }));
+}
+
+/* "Who else lives here" style row — bold label + underlined Edit link,
+   rather than a value. */
+function reviewLinkRow(label) {
+  return h('div', { class: 'rs-row rs-row--link' },
+    h('span', { class: 'rs-row-label rs-row-label--strong', text: label }),
+    h('button', { class: 'rs-edit-link', text: 'Edit' })
   );
 }
 
@@ -364,10 +403,36 @@ function review() {
         reviewRow('Monthly rent', '$2,400'),
         reviewRow('Represented by a renter’s agent', 'No'),
         reviewRow('Applying with a guarantor or co-signer', 'No'),
-        h('div', { class: 'rs-row rs-row--link' },
-          h('span', { class: 'rs-row-label', text: 'Who else lives here' }),
+        reviewLinkRow('Who else lives here'),
+        reviewRow('Pets', 'Yes'),
+        reviewSubhead('Pet 1'),
+        reviewRow('Type / breed', 'Labrador retriever'),
+        reviewRow('Weight', '65 lbs'),
+        reviewRow('Anyone else living here', 'Yes'),
+        reviewSubhead('First additional tenant'),
+        reviewRow('Name', 'Sam Reyes'),
+        reviewRow('Email or phone', 'sam.reyes@example.com')
+      ),
+      h('div', { class: 'rs-card' },
+        h('div', { class: 'rs-card-header' },
+          h('p', { class: 'rs-card-title', text: 'Home history' }),
           h('button', { class: 'rs-edit-btn', text: 'Edit' })
-        )
+        ),
+        reviewRow('Current home', '1240 Cedar St, Austin, TX 78702'),
+        reviewRow('Own or rent this place', 'Rent'),
+        reviewSubhead('Rental details'),
+        reviewRow('Monthly rent', '$1,500'),
+        reviewRowStack('Landlord contact info', ['Chuck Midas', 'chuck@example.com', '(315) 560-5656']),
+        reviewRow('Move-in date', 'Nov 2023')
+      ),
+      h('div', { class: 'rs-card' },
+        h('div', { class: 'rs-card-header' },
+          h('p', { class: 'rs-card-title', text: 'Work history' }),
+          h('button', { class: 'rs-edit-btn', text: 'Edit' })
+        ),
+        reviewRow('Current work status', 'Employed'),
+        reviewSubhead('Work details'),
+        reviewRowStack('Employment info', ['Northwind Design Co.', 'Floor manager'])
       )
   );
 
@@ -391,6 +456,39 @@ const PAYMENT_LINE_ITEMS = [
 ];
 
 function money(n) { return `$${n.toFixed(2)}`; }
+
+/* Bottom sheet — slides up from the .product frame's own bottom edge (not
+   the browser viewport), matching the portfolio's slide-in motion tokens.
+   Reused by payment() for the wallet picker; generic enough for any
+   pick-one-of-a-few-options prompt. */
+function bottomSheet(title, items, onSelect) {
+  const optionButtons = items.map(item => {
+    const btn = h('button', { type: 'button', class: 'rs-sheet-option' },
+      h('span', { class: 'rs-sheet-option-icon' }, item.icon()),
+      h('span', { class: 'rs-sheet-option-label', text: item.label })
+    );
+    btn.addEventListener('click', () => { onSelect(item); close(); });
+    return btn;
+  });
+  const cancelBtn = h('button', { type: 'button', class: 'rs-sheet-cancel', text: 'Cancel' });
+  const sheet = h('div', { class: 'rs-sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': title },
+    h('div', { class: 'rs-sheet-handle' }),
+    h('p', { class: 'rs-sheet-title', text: title }),
+    h('div', { class: 'rs-sheet-options' }, optionButtons),
+    cancelBtn
+  );
+  const backdrop = h('div', { class: 'rs-sheet-backdrop' });
+  const root = h('div', { class: 'rs-sheet-root' }, backdrop, sheet);
+
+  function open() { root.classList.add('is-open'); }
+  function close() { root.classList.remove('is-open'); }
+  backdrop.addEventListener('click', close);
+  cancelBtn.addEventListener('click', close);
+
+  root.open = open;
+  root.close = close;
+  return root;
+}
 
 function payment() {
   let screeningIncluded = true;
@@ -471,6 +569,28 @@ function payment() {
   saveCardRow.addEventListener('click', toggleSaveCard);
   saveCardRow.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleSaveCard(); } });
 
+  /* "Add payment method" — opens a sheet to pick Apple Pay or Google Pay
+     instead of the card fields above. Picking one just marks the row
+     selected; there's no real wallet integration to hand off to. */
+  const walletOptionDesc = h('p', { class: 'rs-payment-option-desc', text: 'Bank account, Apple Pay, Google Pay' });
+  const walletRadioDot = h('span', { class: 'rs-radio-dot' });
+  const walletOptionRow = h('button', { type: 'button', class: 'rs-payment-option-row' },
+    h('span', { class: 'rs-payment-option-icon' }, Icon.wallet()),
+    h('span', { class: 'rs-payment-option-copy' },
+      h('p', { class: 'rs-payment-option-title', text: 'Add payment method' }),
+      walletOptionDesc
+    ),
+    walletRadioDot
+  );
+  const walletSheet = bottomSheet('Choose a payment method', [
+    { label: 'Apple Pay', icon: Icon.apple },
+    { label: 'Google Pay', icon: Icon.googlePay },
+  ], item => {
+    walletRadioDot.classList.add('is-selected');
+    walletOptionDesc.textContent = item.label;
+  });
+  walletOptionRow.addEventListener('click', () => walletSheet.open());
+
   renderTotal();
 
   // "You click into the empty states, and it autofills in fake information.
@@ -501,7 +621,11 @@ function payment() {
       cardNumberInput,
       h('div', { class: 'rs-field-row' }, expirationInput, cvcInput)
     ),
-    h('div', { class: 'rs-save-card-row' }, saveCardRow)
+    h('div', { class: 'rs-save-card-row' }, saveCardRow),
+    h('div', { class: 'rs-payment-options' },
+      walletOptionRow,
+      h('p', { class: 'rs-payment-security' }, Icon.lock(), h('span', { text: 'Your card is encrypted by Stripe.' }))
+    )
   );
 
   return h('div', { class: 'product' },
@@ -510,7 +634,8 @@ function payment() {
     h('div', { class: 'rs-bottom-bar' },
       h('button', { class: 'rs-btn-primary', text: 'Pay' })
     ),
-    scrollTopControl(scrollEl)
+    scrollTopControl(scrollEl),
+    walletSheet
   );
 }
 

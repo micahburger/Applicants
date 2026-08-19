@@ -182,6 +182,8 @@
 .rs-row:first-of-type { border-top: none; padding-top: 0; }
 .rs-row-label { font-size: 13px; color: var(--rs-ink); opacity: .62; flex-shrink: 0; }
 .rs-row-value { font-size: 14px; font-weight: 600; color: var(--rs-ink); text-align: right; }
+.rs-row-value--stack { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.rs-row-label--strong { opacity: 1; font-weight: 700; }
 .rs-row--link { align-items: center; }
 
 /* ── Overview: agent card ─────────────────────────────────────────────── */
@@ -273,6 +275,7 @@
 .rs-expand-panel-close:hover { background: rgba(26, 26, 24, 0.16); }
 .rs-expand-panel-close:focus-visible { outline: 2px solid var(--rs-signal); outline-offset: 2px; }
 .rs-expand-panel-helper { font-size: 12px; color: var(--rs-ink); opacity: .62; line-height: 1.5; margin: 0; }
+.rs-expand-panel-fields { display: flex; flex-direction: column; gap: 14px; }
 
 .rs-add-row {
   display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
@@ -344,6 +347,67 @@
 .rs-payment-fields .rs-field-row { display: flex; gap: 10px; }
 
 .rs-save-card-row { padding: 4px 20px 4px; }
+
+/* ── "Add payment method" option + wallet picker sheet ───────────────────── */
+.rs-payment-options { padding: 14px 20px 4px; }
+.rs-payment-option-row {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  border: 1.5px solid rgba(26, 26, 24, 0.14); border-radius: 12px; padding: 14px 16px; background: var(--rs-paper);
+  transition: border-color .15s ease;
+}
+.rs-payment-option-row:hover { border-color: rgba(26, 26, 24, 0.28); }
+.rs-payment-option-row:focus-visible { outline: 2px solid var(--rs-signal); outline-offset: 2px; }
+.rs-payment-option-icon {
+  width: 40px; height: 40px; border-radius: 10px; background: var(--rs-fog); color: var(--rs-ink);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.rs-payment-option-copy { flex: 1; min-width: 0; }
+.rs-payment-option-title { font-size: 14px; font-weight: 700; margin: 0 0 2px; }
+.rs-payment-option-desc { font-size: 12.5px; color: var(--rs-ink); opacity: .62; margin: 0; }
+/* Standalone selected state — this radio dot isn't nested in a .rs-radio-row,
+   so it needs its own rule rather than relying on the ancestor selector. */
+.rs-radio-dot.is-selected { background: var(--rs-ink); border-color: var(--rs-ink); }
+.rs-radio-dot.is-selected::after { opacity: 1; }
+
+.rs-payment-security {
+  display: flex; align-items: center; gap: 6px; margin: 12px 0 0; font-size: 12px; color: var(--rs-ink); opacity: .55;
+}
+.rs-payment-security svg { flex-shrink: 0; width: 14px; height: 14px; }
+
+/* Sheet slides up from the .product frame's own edge — .product is the
+   position:relative + overflow:hidden viewport, so an absolutely
+   positioned sheet is clipped to the phone, never the browser window. */
+.rs-sheet-root { position: absolute; inset: 0; z-index: 30; pointer-events: none; }
+.rs-sheet-root.is-open { pointer-events: auto; }
+.rs-sheet-backdrop {
+  position: absolute; inset: 0; background: rgba(26, 26, 24, 0.4); opacity: 0;
+  transition: opacity var(--duration-base, .2s) ease;
+}
+.rs-sheet-root.is-open .rs-sheet-backdrop { opacity: 1; }
+.rs-sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; background: var(--rs-paper);
+  border-radius: 20px 20px 0 0; padding: 10px 20px 28px; box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.18);
+  transform: translateY(100%);
+  transition: transform var(--duration-slow, .28s) var(--ease-enter, cubic-bezier(.22, 1, .36, 1));
+}
+.rs-sheet-root.is-open .rs-sheet { transform: translateY(0); }
+.rs-sheet-handle { width: 36px; height: 4px; border-radius: 999px; background: rgba(26, 26, 24, 0.18); margin: 0 auto 14px; }
+.rs-sheet-title { font-size: 15px; font-weight: 700; margin: 0 0 14px; }
+.rs-sheet-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.rs-sheet-option {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 14px 16px;
+  border: 1.5px solid rgba(26, 26, 24, 0.14); border-radius: 12px; background: var(--rs-paper);
+  font-family: var(--rs-font-body); font-size: 15px; font-weight: 600; color: var(--rs-ink);
+  transition: border-color .15s ease;
+}
+.rs-sheet-option:hover { border-color: rgba(26, 26, 24, 0.28); }
+.rs-sheet-option:focus-visible { outline: 2px solid var(--rs-signal); outline-offset: 2px; }
+.rs-sheet-option-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--rs-ink); }
+.rs-sheet-cancel {
+  width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--rs-fog);
+  font-family: var(--rs-font-body); font-size: 15px; font-weight: 700; color: var(--rs-ink);
+}
+.rs-sheet-cancel:focus-visible { outline: 2px solid var(--rs-signal); outline-offset: 2px; }
 
 /* ── Plain step-form fields (Your Details) ─────────────────────────────── */
 .rs-form-fields { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 10px; }
