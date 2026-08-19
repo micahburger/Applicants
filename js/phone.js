@@ -83,6 +83,7 @@ function buildPhone(mountEl) {
   screenWrap.addEventListener('rs-navigate', e => {
     const to = e.detail && e.detail.to;
     if (!to) return;
+    const value = e.detail.value;
     if (to === 'back') {
       if (!navStack.length) return;
       currentScreenName = navStack.pop();
@@ -90,7 +91,7 @@ function buildPhone(mountEl) {
       navStack.push(currentScreenName);
       currentScreenName = to;
     }
-    fadeIn(mountScreen(undefined, currentScreenName));
+    fadeIn(mountScreen(value, currentScreenName));
   });
 
   const overlay = document.createElement('button');

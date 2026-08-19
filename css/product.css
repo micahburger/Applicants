@@ -424,3 +424,63 @@
   color: var(--rs-ink); opacity: .55; pointer-events: none; display: flex;
 }
 .rs-form-checkbox-row { padding: 2px 0 2px; }
+
+/* ── Loader (Hang tight) — checklist rows build in one at a time ────────── */
+.rs-checklist { padding: 28px 20px 8px; display: flex; flex-direction: column; gap: 12px; }
+.rs-checklist-item {
+  display: flex; align-items: center; gap: 14px;
+  border: 1px solid rgba(26, 26, 24, 0.12); border-radius: 14px; padding: 16px;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity var(--duration-slow, .28s) var(--ease-enter, ease), transform var(--duration-slow, .28s) var(--ease-enter, ease);
+}
+.rs-checklist-item.is-visible { opacity: 1; transform: translateY(0); }
+.rs-checklist-icon {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.rs-checklist-icon svg { width: 16px; height: 16px; }
+.rs-checklist-icon--pending { background: var(--rs-signal-tint); color: var(--rs-signal); }
+.rs-checklist-icon--done { background: var(--rs-mint); color: var(--rs-moss); }
+.rs-checklist-icon--spin svg { animation: rsSpin 1s linear infinite; }
+.rs-checklist-copy { flex: 1; min-width: 0; }
+.rs-checklist-label { font-size: 15.5px; font-weight: 600; color: var(--rs-ink); margin: 0; line-height: 1.35; }
+.rs-checklist-sub { font-size: 12.5px; color: var(--rs-ink); opacity: .5; margin: 3px 0 0; }
+@keyframes rsSpin { to { transform: rotate(-360deg); } }
+
+/* ── Review reports (credit/background check cards) ─────────────────────── */
+.rs-row-value--score { font-size: 30px; font-weight: 700; line-height: 1; }
+.rs-card-desc { font-size: 13px; color: var(--rs-ink); opacity: .62; line-height: 1.5; margin: 0 0 12px; }
+.rs-note-box { background: var(--rs-fog); border-radius: 10px; padding: 12px 14px; margin: 4px 0 14px; }
+.rs-note-box p { font-size: 13px; color: var(--rs-ink); opacity: .72; line-height: 1.5; margin: 0; }
+.rs-outline-btn {
+  width: 100%; padding: 13px; border-radius: 12px; border: 1px solid rgba(26, 26, 24, 0.16);
+  background: var(--rs-paper); font-family: var(--rs-font-body); font-weight: 600; font-size: 14px; color: var(--rs-ink);
+  transition: background-color .15s ease, border-color .15s ease;
+}
+.rs-outline-btn:hover { background: rgba(26, 26, 24, 0.04); border-color: rgba(26, 26, 24, 0.28); }
+.rs-outline-btn:focus-visible { outline: 2px solid var(--rs-signal); outline-offset: 2px; }
+.rs-reviewed-row { padding: 4px 20px 20px; }
+
+/* ── Toast — slides down from the .product frame's own top edge, same
+   contained-absolute technique as .rs-sheet-root. ──────────────────────── */
+.rs-toast-wrap {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 40;
+  display: flex; justify-content: center; padding: 54px 20px 0; pointer-events: none;
+}
+.rs-toast {
+  pointer-events: auto; display: flex; align-items: center; gap: 8px;
+  background: var(--rs-signal-tint); color: var(--rs-ink); border-radius: 14px; padding: 12px 12px 12px 14px;
+  font-family: var(--rs-font-body); font-size: 13px; font-weight: 600;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
+  opacity: 0; transform: translateY(-130%);
+  transition: opacity var(--duration-slow, .28s) var(--ease-enter, ease), transform var(--duration-slow, .28s) var(--ease-enter, ease);
+}
+.rs-toast.is-visible { opacity: 1; transform: translateY(0); }
+.rs-toast-icon { width: 18px; height: 18px; color: var(--rs-signal); display: flex; flex-shrink: 0; }
+.rs-toast-text { flex: 1; }
+.rs-toast-close {
+  display: flex; align-items: center; justify-content: center; background: none; border: none;
+  padding: 2px; color: var(--rs-ink); opacity: .6; flex-shrink: 0;
+}
+.rs-toast-close svg { width: 16px; height: 16px; }
+.rs-toast-close:hover { opacity: .85; }

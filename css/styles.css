@@ -466,7 +466,7 @@ html {
 /* ── Footer ────────────────────────────────────────────────────────────── */
 .site-footer {
   display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; align-items: baseline;
-  padding: 40px var(--gutter) 96px; border-top: 1px solid var(--page-rule);
+  padding: 40px var(--gutter) 48px; border-top: 1px solid var(--page-rule);
   font-family: var(--font-label); font-size: 11px; letter-spacing: 0.06em; color: var(--page-muted);
 }
 .site-footer a { color: var(--page-soft); text-decoration: underline; text-underline-offset: 3px; }

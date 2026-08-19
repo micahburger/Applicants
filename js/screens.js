@@ -62,6 +62,8 @@ const Icon = {
   lock: () => svg('<rect x="4" y="10" width="16" height="11" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 10V7a4.5 4.5 0 0 1 9 0v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'),
   apple: () => svg('<path d="M15.6 3.8c.1 1-.3 2-.9 2.7-.7.8-1.8 1.4-2.8 1.3-.1-1 .4-2 1-2.7.7-.8 1.9-1.4 2.7-1.3zM18.9 17c-.5 1.1-.7 1.6-1.3 2.5-.9 1.4-2.1 3-3.6 3-1.3 0-1.7-.9-3.4-.9-1.8 0-2.2.9-3.4.9-1.5 0-2.6-1.5-3.5-2.9C1 15.8.6 11.1 2.3 8.7c1.2-1.7 3-2.7 4.7-2.7 1.7 0 2.8 1 4.2 1 1.4 0 2.2-1 4.2-1 1.5 0 3.1.8 4.2 2.3-3.7 2-3.1 7.3-.7 8.7z" fill="currentColor"/>'),
   googlePay: () => svg('<circle cx="12" cy="12" r="10" fill="currentColor"/><text x="12" y="16.5" font-family="Manrope, system-ui, sans-serif" font-size="12" font-weight="700" text-anchor="middle" fill="var(--rs-paper)">G</text>', '0 0 24 24'),
+  refresh: () => svg('<path d="M4 4v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.6 15A8 8 0 1 0 6 6.3L4 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'),
+  info: () => svg('<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 11v5.5M12 8v.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'),
 };
 
 function statusBar({ onHero } = {}) {
@@ -124,8 +126,17 @@ function propertyCard(p) {
   );
 }
 
-function applicationsList() {
-  return h('div', { class: 'product' },
+/* `highlight === 'submitted'` — landing here fresh off the pay → review →
+   submit flow. Marks 789 Birch Blvd Submitted (without mutating the shared
+   PROPERTIES array, since a still-mount elsewhere on the page renders the
+   default state) and shows the "Application sent" toast. */
+function applicationsList(highlight) {
+  const justSubmitted = highlight === 'submitted';
+  const properties = PROPERTIES.map(p =>
+    justSubmitted && p.address === '789 Birch Blvd, Unit 8' ? { ...p, status: 'submitted', label: 'Submitted' } : p
+  );
+
+  const root = h('div', { class: 'product' },
     statusBar({ onHero: true }),
     h('div', { class: 'rs-scroll' },
       h('div', { class: 'rs-hero-header' },
@@ -135,17 +146,43 @@ function applicationsList() {
         ),
         h('h1', { class: 'rs-hero-title', text: 'Applications' })
       ),
-      h('div', { class: 'rs-list' }, PROPERTIES.map(propertyCard))
+      h('div', { class: 'rs-list' }, properties.map(propertyCard))
     ),
     h('div', { class: 'rs-bottom-bar' },
       h('button', { class: 'rs-btn-primary', text: 'Finish applications' })
     )
   );
+
+  if (justSubmitted) {
+    const closeBtn = h('button', { type: 'button', class: 'rs-toast-close', 'aria-label': 'Dismiss' }, Icon.close());
+    const toast = h('div', { class: 'rs-toast' },
+      h('span', { class: 'rs-toast-icon' }, Icon.info()),
+      h('span', { class: 'rs-toast-text', text: 'Application sent' }),
+      closeBtn
+    );
+    root.appendChild(h('div', { class: 'rs-toast-wrap' }, toast));
+
+    let dismissed = false;
+    function dismiss() {
+      if (dismissed) return;
+      dismissed = true;
+      toast.classList.remove('is-visible');
+      setTimeout(() => toast.parentElement && toast.parentElement.remove(), 300);
+    }
+    closeBtn.addEventListener('click', dismiss);
+    requestAnimationFrame(() => toast.classList.add('is-visible'));
+    setTimeout(dismiss, 3000);
+  }
+
+  return root;
 }
 
 /* ============================================================================
-   2. overview — one function, two states. Only the step badges/Edit buttons
-   and the bottom-button label may differ between 'fresh' and 'resumed'.
+   2. overview — one function, three states: 'fresh' (nothing started),
+   'resumed' (This rental already done — the toggle's default), and
+   'resumed-about-you-done', reached by completing the About you form and
+   hitting Continue there. Only the step badges/Edit buttons and the
+   bottom-button label differ between states.
    ============================================================================ */
 
 const OVERVIEW_STEPS = [
@@ -154,6 +191,13 @@ const OVERVIEW_STEPS = [
   { n: 3, label: 'Credit and background' },
   { n: 4, label: 'Review and pay' },
 ];
+
+// Which step numbers show a check for a given overview state.
+function doneStepsFor(state) {
+  if (state === 'resumed-about-you-done') return [1, 2];
+  if (state === 'resumed') return [1];
+  return [];
+}
 
 function stepRow(step, done) {
   return h('div', { class: 'rs-step-row' },
@@ -164,9 +208,10 @@ function stepRow(step, done) {
 }
 
 function overview(state) {
-  const resumed = state === 'resumed';
+  const started = state === 'resumed' || state === 'resumed-about-you-done';
+  const doneSteps = new Set(doneStepsFor(state));
 
-  const primaryBtn = h('button', { class: 'rs-btn-primary', text: resumed ? 'Continue' : 'Start application' });
+  const primaryBtn = h('button', { class: 'rs-btn-primary', text: started ? 'Continue' : 'Start application' });
   primaryBtn.addEventListener('click', () => {
     primaryBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'yourDetails' } }));
   });
@@ -195,7 +240,7 @@ function overview(state) {
         h('p', { class: 'rs-section-sub', text: 'About 10 minutes. Your progress saves as you go.' })
       ),
       h('div', { class: 'rs-card rs-steps', style: 'margin-top:14px;' },
-        OVERVIEW_STEPS.map(step => stepRow(step, resumed && step.n < 4))
+        OVERVIEW_STEPS.map(step => stepRow(step, doneSteps.has(step.n)))
       )
     ),
     h('div', { class: 'rs-bottom-bar' }, primaryBtn)
@@ -447,7 +492,8 @@ function review() {
 }
 
 /* ============================================================================
-   5. payment — working total, working checkbox, focusable fields, inert Pay.
+   5. payment — working total, working checkbox, focusable fields. Pay
+   navigates into the loader → review-report → submit flow (below).
    ============================================================================ */
 
 const PAYMENT_LINE_ITEMS = [
@@ -593,6 +639,11 @@ function payment() {
 
   renderTotal();
 
+  const payBtn = h('button', { class: 'rs-btn-primary', text: 'Pay' });
+  payBtn.addEventListener('click', () => {
+    payBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'loader' } }));
+  });
+
   // "You click into the empty states, and it autofills in fake information.
   // That's as far as that design needs to go." — no validation, no storage,
   // just a plausible value dropped in on first focus.
@@ -631,31 +682,196 @@ function payment() {
   return h('div', { class: 'product' },
     statusBar(),
     scrollEl,
-    h('div', { class: 'rs-bottom-bar' },
-      h('button', { class: 'rs-btn-primary', text: 'Pay' })
-    ),
+    h('div', { class: 'rs-bottom-bar' }, payBtn),
     scrollTopControl(scrollEl),
     walletSheet
   );
 }
 
 /* ============================================================================
-   6. your-details — a general example of the step-form shell (nav, progress,
-   plain fields) the rest of the "About you" flow will reuse. Fields are
-   functional (focus states) but not autofilled — that gimmick is scoped to
-   the payment screen only, per direction.
+   5a. loader — "Hang tight" post-Pay screen. Checklist rows build in one at
+   a time on a timer, each holding long enough to read before it flips to
+   done, then auto-navigates into reviewReport. No header/back — this step
+   isn't interactive or interruptible, matching the refs.
    ============================================================================ */
 
-function fieldWithIcon(placeholder, iconFn, inputProps) {
-  return h('div', { class: 'rs-field-icon-wrap' },
-    h('input', Object.assign({ type: 'text', placeholder, autocomplete: 'off' }, inputProps || {})),
-    h('span', { class: 'rs-field-icon' }, iconFn())
+const LOADER_STEPS = [
+  'Processing your payment',
+  'Sending your application to Jordan',
+  'Verifying your identity',
+  'Running your credit and background checks',
+  'Getting your reports ready for you to review',
+];
+
+function loader() {
+  const items = LOADER_STEPS.map((label, i) => {
+    const iconWrap = h('span', { class: 'rs-checklist-icon rs-checklist-icon--pending rs-checklist-icon--spin' }, Icon.refresh());
+    const sub = i === LOADER_STEPS.length - 1 ? h('p', { class: 'rs-checklist-sub', text: 'In progress' }) : null;
+    const row = h('div', { class: 'rs-checklist-item' },
+      iconWrap,
+      h('div', { class: 'rs-checklist-copy' }, h('p', { class: 'rs-checklist-label', text: label }), sub)
+    );
+    return { row, iconWrap, sub };
+  });
+
+  const root = h('div', { class: 'product' },
+    statusBar(),
+    h('div', { class: 'rs-scroll' },
+      h('div', { class: 'rs-page-head', style: 'padding-top:28px;' },
+        h('h1', { class: 'rs-h1', text: "Hang tight. We're running your reports." })
+      ),
+      h('div', { class: 'rs-checklist' }, items.map(item => item.row))
+    )
+  );
+
+  function markDone(item) {
+    item.iconWrap.className = 'rs-checklist-icon rs-checklist-icon--done';
+    item.iconWrap.innerHTML = '';
+    item.iconWrap.appendChild(Icon.check());
+    if (item.sub) item.sub.remove();
+  }
+
+  // Recursive setTimeout rather than setInterval — each step's hold time can
+  // vary (the last one lingers a beat longer) and it self-cancels cleanly:
+  // every callback checks root.isConnected first, so if the phone is reset
+  // or swapped to another screen mid-sequence, the chain just stops.
+  function advance(i) {
+    if (!root.isConnected) return;
+    if (i >= items.length) {
+      setTimeout(() => {
+        if (!root.isConnected) return;
+        root.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'reviewReport' } }));
+      }, 500);
+      return;
+    }
+    requestAnimationFrame(() => items[i].row.classList.add('is-visible'));
+    const holdMs = i === items.length - 1 ? 900 : 750;
+    setTimeout(() => {
+      if (!root.isConnected) return;
+      markDone(items[i]);
+      setTimeout(() => advance(i + 1), 260);
+    }, holdMs);
+  }
+  setTimeout(() => advance(0), 300);
+
+  return root;
+}
+
+/* ============================================================================
+   5b. reviewReport — "Review your reports" credit/background check summary.
+   Reuses .rs-card/.rs-row from review(). The reviewed checkbox is optional
+   per the refs (not required to submit). Submit navigates to
+   applicationsList with value 'submitted' to show the Submitted status +
+   toast back on the applications list.
+   ============================================================================ */
+
+function reviewReport() {
+  const reviewedMark = h('div', { class: 'rs-checkbox' }, Icon.check());
+  const reviewedRow = h('div', { class: 'rs-checkbox-row', role: 'checkbox', 'aria-checked': 'false', tabindex: '0' },
+    reviewedMark,
+    h('div', { class: 'rs-checkbox-copy' }, h('p', { class: 'rs-checkbox-title', text: "I've reviewed my reports" }))
+  );
+  function toggleReviewed() {
+    const checked = reviewedMark.classList.toggle('is-checked');
+    reviewedRow.setAttribute('aria-checked', String(checked));
+  }
+  reviewedRow.addEventListener('click', toggleReviewed);
+  reviewedRow.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleReviewed(); } });
+
+  const backBtn = h('button', { class: 'rs-icon-btn', 'aria-label': 'Back' }, Icon.back());
+  backBtn.addEventListener('click', () => {
+    backBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'back' } }));
+  });
+  const closeBtn = h('button', { class: 'rs-icon-btn', 'aria-label': 'Close' }, Icon.close());
+  closeBtn.addEventListener('click', () => {
+    closeBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'back' } }));
+  });
+
+  function readyPill() { return h('span', { class: 'rs-pill rs-pill--submitted', text: 'Ready' }); }
+  function cardHeader(title) {
+    return h('div', { class: 'rs-card-header' }, h('p', { class: 'rs-card-title', text: title }), readyPill());
+  }
+
+  const scrollEl = h('div', { class: 'rs-scroll' },
+    h('div', { class: 'rs-navbar' }, backBtn, h('span', { class: 'rs-navbar-title', text: '789 Birch Blvd, Unit 8' }), closeBtn),
+    h('div', { class: 'rs-page-head' },
+      h('h1', { class: 'rs-h1', text: 'Review your reports' }),
+      h('p', { class: 'rs-subtitle', text: 'Check these over, then send them to Jordan to finish.' })
+    ),
+    h('div', { class: 'rs-card' },
+      cardHeader('Credit report'),
+      h('div', { class: 'rs-row' }, h('span', { class: 'rs-row-label', text: 'TransUnion score' }), h('span', { class: 'rs-row-value rs-row-value--score', text: '742' })),
+      reviewRow('Tradelines', '5 active, 2 closed'),
+      reviewRow('Credit inquiries', '2'),
+      reviewRow('Collections', '0 open, 0 closed'),
+      reviewRow('Public records', '0'),
+      h('div', { class: 'rs-note-box' }, h('p', { text: 'No late payments across 7 accounts. Low utilization and a long, clean history.' })),
+      h('button', { type: 'button', class: 'rs-outline-btn', text: 'View full report' })
+    ),
+    h('div', { class: 'rs-card' },
+      cardHeader('Reference check'),
+      h('p', { class: 'rs-card-desc', text: 'Requests sent to the 2 references you gave us.' }),
+      h('button', { type: 'button', class: 'rs-outline-btn', text: 'View references' })
+    ),
+    h('div', { class: 'rs-card' },
+      cardHeader('Background check'),
+      h('p', { class: 'rs-card-desc', text: '1 record found. National, county, and sex-offender registries across 50 states.' }),
+      h('button', { type: 'button', class: 'rs-outline-btn', text: 'View report' })
+    ),
+    h('div', { class: 'rs-card' },
+      cardHeader('Eviction record'),
+      h('p', { class: 'rs-card-desc', text: '1 record found. Filings in the nationwide eviction database.' }),
+      h('button', { type: 'button', class: 'rs-outline-btn', text: 'View report' })
+    ),
+    h('div', { class: 'rs-reviewed-row' }, reviewedRow)
+  );
+
+  const submitBtn = h('button', { class: 'rs-btn-primary', text: 'Submit application' });
+  submitBtn.addEventListener('click', () => {
+    submitBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'applicationsList', value: 'submitted' } }));
+  });
+
+  return h('div', { class: 'product' },
+    statusBar(),
+    scrollEl,
+    h('div', { class: 'rs-bottom-bar' }, submitBtn),
+    scrollTopControl(scrollEl)
   );
 }
 
+/* ============================================================================
+   6. your-details — step 1 of "About you". Every field autofills a plausible
+   value on first focus (same trick as payment()'s card fields) — the point
+   isn't a working form, it's a fast way to show a section going from
+   untouched to complete. Continue pops back to overview() with
+   'resumed-about-you-done' so the About you step picks up its check.
+   ============================================================================ */
+
+function fieldWithIcon(inputEl, iconFn) {
+  return h('div', { class: 'rs-field-icon-wrap' }, inputEl, h('span', { class: 'rs-field-icon' }, iconFn()));
+}
+
 function yourDetails() {
+  function autofillOnFocus(input, fakeValue) {
+    input.addEventListener('focus', () => {
+      if (!input.value) input.value = fakeValue;
+    }, { once: true });
+  }
+
+  const firstNameInput = h('input', { type: 'text', placeholder: 'First name', autocomplete: 'off' });
+  const lastNameInput = h('input', { type: 'text', placeholder: 'Last name', autocomplete: 'off' });
+  const dobInput = h('input', { type: 'text', placeholder: 'Date of birth', autocomplete: 'off' });
+  const phoneInput = h('input', { type: 'tel', placeholder: 'Phone number', autocomplete: 'off' });
+  const emailInput = h('input', { type: 'email', placeholder: 'Email', autocomplete: 'off' });
+  autofillOnFocus(firstNameInput, 'Taylor');
+  autofillOnFocus(lastNameInput, 'Morgan');
+  autofillOnFocus(dobInput, 'Apr 18, 1992');
+  autofillOnFocus(phoneInput, '(512) 555-0134');
+  autofillOnFocus(emailInput, 'taylor.morgan@example.com');
+
   const noMiddleMark = h('div', { class: 'rs-checkbox' }, Icon.check());
   const middleNameInput = h('input', { type: 'text', placeholder: 'Middle name', autocomplete: 'off' });
+  autofillOnFocus(middleNameInput, 'Reese');
   const noMiddleRow = h('div', { class: 'rs-checkbox-row', role: 'checkbox', 'aria-checked': 'false', tabindex: '0' },
     noMiddleMark,
     h('div', { class: 'rs-checkbox-copy' }, h('p', { class: 'rs-checkbox-title', text: 'I have no middle name' }))
@@ -677,25 +893,28 @@ function yourDetails() {
       h('p', { class: 'rs-subtitle', text: 'Use your legal name so we can match it to your ID.' })
     ),
     h('div', { class: 'rs-form-fields' },
-      h('input', { type: 'text', placeholder: 'First name', autocomplete: 'off' }),
+      firstNameInput,
       middleNameInput,
       h('div', { class: 'rs-form-checkbox-row' }, noMiddleRow),
-      h('input', { type: 'text', placeholder: 'Last name', autocomplete: 'off' }),
-      fieldWithIcon('Date of birth', Icon.calendar),
-      fieldWithIcon('Phone number', Icon.phone, { type: 'tel' }),
-      fieldWithIcon('Email', Icon.envelope, { type: 'email' })
+      lastNameInput,
+      fieldWithIcon(dobInput, Icon.calendar),
+      fieldWithIcon(phoneInput, Icon.phone),
+      fieldWithIcon(emailInput, Icon.envelope)
     )
   );
+
+  const continueBtn = h('button', { class: 'rs-btn-primary', text: 'Continue' });
+  continueBtn.addEventListener('click', () => {
+    continueBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'back', value: 'resumed-about-you-done' } }));
+  });
 
   return h('div', { class: 'product' },
     statusBar(),
     scrollEl,
-    h('div', { class: 'rs-bottom-bar' },
-      h('button', { class: 'rs-btn-primary', text: 'Continue' })
-    ),
+    h('div', { class: 'rs-bottom-bar' }, continueBtn),
     scrollTopControl(scrollEl)
   );
 }
 
 /* ── Exposed as plain globals, matching the rest of the codebase ────────── */
-window.RSScreens = { applicationsList, overview, household, review, payment, yourDetails };
+window.RSScreens = { applicationsList, overview, household, review, payment, loader, reviewReport, yourDetails };
