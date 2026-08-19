@@ -69,6 +69,18 @@
   --content-max: 1080px;
   --gutter: clamp(20px, 6vw, 48px);
   --space-section: clamp(64px, 10vw, 120px);
+
+  /* ── Hero signature palette — scoped exception to the one-accent rule
+     above. The character-scramble in js/hero.js is a single deliberate
+     flourish, not part of the page's restrained chrome, so it gets its own
+     small saturated set (ported from the source CodePen) instead of cycling
+     through the neutral --page-* ramp, which read as colorless against
+     --page-bg. Used nowhere outside js/hero.js. */
+  --hero-spark-1: #85AF00; /* moss/chartreuse */
+  --hero-spark-2: #FFCC00; /* signal yellow */
+  --hero-spark-3: #FB9CFD; /* magenta pink */
+  --hero-spark-4: #A19BFF; /* periwinkle */
+  --hero-spark-5: #FF4C00; /* orange-red */
 }
 
 /* ── RentSpree register — the product being demoed. Scoped to `.product`

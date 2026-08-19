@@ -15,7 +15,13 @@ const HERO_DIGITS  = '0123456789'.split('');
 const HERO_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
 const HERO_SYMBOLS = '@.-/()#'.split('');
 const HERO_GLYPH_POOL = [...HERO_DIGITS, ...HERO_DIGITS, ...HERO_DIGITS, ...HERO_LETTERS, ...HERO_SYMBOLS];
-const HERO_COLOR_POOL = ['#9C8B70', '#D0C9C1', '#B7B0A8', '#F4F1EC']; // graphite's own ramp
+
+// Pulled from --hero-spark-* at call time (not cached at module load) so the
+// tokens in css/styles.css stay the single source of truth for this palette.
+function heroColorPool() {
+  const style = getComputedStyle(document.documentElement);
+  return [1, 2, 3, 4, 5].map(n => style.getPropertyValue(`--hero-spark-${n}`).trim());
+}
 
 function heroRandomGlyph() {
   return HERO_GLYPH_POOL[Math.floor(Math.random() * HERO_GLYPH_POOL.length)];
@@ -29,13 +35,14 @@ function heroDebounce(fn, wait) {
 function scrambleLine(line, allChars) {
   const charsInLine = allChars.filter(c => line.contains(c));
   const middleIndex = (charsInLine.length - 1) / 2;
+  const colorPool = heroColorPool();
 
   charsInLine.forEach((char, index) => {
     if (!char.dataset.orig) char.dataset.orig = char.textContent;
     const distanceFromCenter = Math.abs(index - middleIndex);
 
     gsap.fromTo(char, { color: '#F4F1EC' }, {
-      color: gsap.utils.random(HERO_COLOR_POOL),
+      color: gsap.utils.random(colorPool),
       ease: 'power3.out',
       duration: 0.3,
       delay: distanceFromCenter * 0.03,
@@ -51,7 +58,7 @@ function scrambleLine(line, allChars) {
           detail.className = 'detail-size';
           detail.textContent = `△x = ${char.clientWidth}px`;
           char.appendChild(detail);
-          char.style.border = '1px solid var(--page-accent)';
+          char.style.border = `1px solid ${gsap.utils.random(colorPool)}`;
         }
       },
       onComplete: () => {
