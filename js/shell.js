@@ -4,14 +4,13 @@
    ============================================================================ */
 
 const SECTIONS = [
-  { id: 'hero',      name: 'Hero' },
-  { id: 'thesis',    name: 'Thesis' },
-  { id: 'diagnosis', name: 'Diagnosis' },
-  { id: 'arc-1',     name: 'Arc one' },
-  { id: 'arc-2',     name: 'Arc two' },
-  { id: 'arc-3',     name: 'Arc three' },
-  { id: 'influence', name: 'Influence' },
-  { id: 'close',     name: 'Close' },
+  { id: 'hero',              name: 'Hero' },
+  { id: 'thesis',            name: 'Thesis' },
+  { id: 'diagnosis',         name: 'Diagnosis' },
+  { id: 'arc-1',             name: 'Arc one' },
+  { id: 'arc-2',             name: 'Arc two' },
+  { id: 'arc-3',             name: 'Arc three' },
+  { id: 'close',             name: 'Close' },
 ];
 
 const shellReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

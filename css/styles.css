@@ -17,7 +17,7 @@
 :root {
   /* ── Portfolio register — inherited from lattice2026's Graphite Night
      atmosphere + contemporary type system. This is the hand. ───────────── */
-  --page-bg:      #111111;
+  --page-bg:      #161516;
   --page-surface: #1D1D1D;
   --page-fg:      #F4F1EC;
   --page-soft:    #D0C9C1;
@@ -158,6 +158,7 @@ a { color: inherit; }
   font-weight: var(--weight-display);
   color: var(--page-fg);
   margin: 0;
+  text-wrap: balance;
 }
 .heading {
   font-family: var(--font-heading);
@@ -219,10 +220,14 @@ section {
   padding-top: 0;
   padding-bottom: 0;
 }
+/* Arc two's 3-up split (text | phone | notes) needs more breathing room than
+   the 1080px reading column gives a single block of prose — widened just for
+   this section so the three tracks aren't cramped. */
+#arc-2 .wrap { max-width: 1320px; }
 
 /* ── Device frame / bezel ─────────────────────────────────────────────────
    Bezel goes lighter than the page, not darker: a black bezel would merge
-   into #111111 and the phone would read as a floating rectangle instead of
+   into --page-bg and the phone would read as a floating rectangle instead of
    a lit panel. --page-surface + a 1px --page-rule edge keeps the frame
    legible against the page while still reading as part of the dark register. */
 .device-frame {
@@ -245,7 +250,7 @@ section {
 }
 
 /* ── Hero — character-scramble stack ──────────────────────────────────────
-   No field of its own (the page is already #111111) — weight comes from
+   No field of its own (the page is already --page-bg) — weight comes from
    scale and emptiness. SplitText/scramble wiring lives in js/hero.js. ────── */
 .title {
   min-height: 100vh;
@@ -397,8 +402,16 @@ html {
 
 /* ── Section content patterns ──────────────────────────────────────────── */
 .eyebrow { display: none; }
-.section-headline { margin: 0 0 20px; max-width: 780px; }
-.section-body { font-family: var(--font-body); font-size: 15px; line-height: 1.75; color: var(--page-soft); max-width: 620px; margin: 0; }
+.section-headline {
+  margin: 0 0 20px;
+  max-width: 780px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 38px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.section-body { font-family: var(--font-body); font-size: 16px; line-height: 1.6; color: var(--page-soft); max-width: 620px; margin: 0; }
 .section-body + .section-body { margin-top: 16px; }
 
 .split { display: grid; grid-template-columns: 1fr; gap: 48px; align-items: start; }
@@ -416,11 +429,41 @@ html {
 }
 .moment-layout { display: grid; grid-template-columns: 1fr; gap: 40px; align-items: start; }
 @media (min-width: 1000px) { .moment-layout { grid-template-columns: auto 1fr; gap: 64px; } }
+@media (min-width: 1000px) {
+  /* Arc two's review moment is a 3-up split: text | phone | notes, all
+     vertically aligned to the same row. align-items:stretch lets the text
+     column (a space-between flex column) reach the row's full height so its
+     follow-up paragraph sits low, near the phone/notes' natural bottom —
+     phone-figure and notes stay visually top-anchored since neither of them
+     stretches its own children, just the empty track space below them. */
+  #review-layout {
+    grid-template-columns: minmax(280px, 1.4fr) 300px minmax(200px, 1fr);
+    gap: 48px;
+    align-items: stretch;
+  }
+}
 .moment-hairline { border-top: 1px solid var(--page-rule); margin: 8px 0 0; }
+.moment-text { display: flex; flex-direction: column; justify-content: space-between; gap: 32px; }
+.moment-followup { margin-top: 20px; }
+
+.moment-title {
+  font-family: var(--font-heading); font-weight: 600; font-size: clamp(20px, 2.4vw, 28px);
+  line-height: 1.15; color: var(--page-fg); margin: 0 0 16px; text-wrap: balance;
+}
 
 .notes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; max-width: 360px; }
 .notes li { display: flex; gap: 14px; font-family: var(--font-body); font-size: 13px; line-height: 1.75; color: var(--page-soft); }
 .notes .n { font-family: var(--font-label); font-size: 12px; color: var(--page-muted); flex-shrink: 0; width: 16px; padding-top: 1px; }
+
+/* ── Arc three's annotation panel — one phone, changing copy. Only one
+   .notes block is unhidden at a time; js/payment-flow.js crossfades between
+   them as the phone advances through the payment sequence. ─────────────── */
+.annotate-panel { position: relative; }
+.notes-group + .notes-group { border-top: 1px solid var(--page-rule); margin-top: 24px; padding-top: 24px; }
+.notes-title {
+  font-family: var(--font-label); font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--page-muted); margin: 0 0 16px;
+}
 
 /* ── Diagnosis — the one earned numbered list ─────────────────────────── */
 .diagnosis-list { max-width: 720px; }
@@ -435,7 +478,7 @@ html {
 /* ── Pull line / pull quote ────────────────────────────────────────────── */
 .pull-quote {
   font-family: var(--font-heading); font-weight: 500; font-size: clamp(26px, 4.2vw, 46px);
-  line-height: 1.28; color: var(--page-accent); margin: 0; max-width: 780px;
+  line-height: 1.28; color: var(--page-accent); margin: 0; max-width: 780px; text-wrap: balance;
 }
 
 /* ── Divider strip — small type, no heading ───────────────────────────────
@@ -459,9 +502,45 @@ html {
 }
 .closing-card p { font-family: var(--font-body); font-size: 14px; line-height: 1.8; color: var(--page-soft); margin: 0; }
 
-.still-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; max-width: 640px; }
-.still-list li { font-family: var(--font-body); font-size: 14px; line-height: 1.7; color: var(--page-soft); padding-left: 20px; position: relative; }
-.still-list li::before { content: '—'; position: absolute; left: 0; color: var(--page-muted); }
+/* ── Close — three text blocks scattered around the hand-with-phone photo,
+   the only raster image on the page, reserved for this final beat. Widened
+   past the standard reading column since three blocks + a tall photo need
+   more room than a single column of prose. Below 1100px the composition
+   doesn't hold up at any reasonable size, so it just stacks in document
+   order — photo in the middle, full width, no absolute positioning. ────── */
+#close .wrap { max-width: 1482px; }
+
+.closing-composite { display: flex; flex-direction: column; align-items: center; gap: 48px; }
+.closing-block { max-width: 480px; }
+.closing-block .section-headline { max-width: none; }
+
+.closing-image {
+  width: min(100%, 747px);
+  aspect-ratio: 1178 / 1335;
+  background-image: url('../img/closing.jpg');
+  background-size: cover;
+  background-position: center;
+  /* --page-bg (#161516) was picked to match this photo's own near-black
+     background almost exactly, so the edge is already close to invisible —
+     the fade is just insurance against the last bit of compression noise. */
+  -webkit-mask-image: radial-gradient(ellipse 70% 65% at center, black 60%, transparent 100%);
+          mask-image: radial-gradient(ellipse 70% 65% at center, black 60%, transparent 100%);
+}
+
+@media (min-width: 1100px) {
+  .closing-composite { position: relative; display: block; min-height: 1200px; }
+  .closing-image {
+    /* Lowest layer of the group — the text blocks sit on top of it and are
+       meant to overlap its edges, not sit beside it. */
+    position: absolute; left: 50%; top: 0; z-index: 0;
+    width: 747px;
+    transform: translateX(-50%);
+  }
+  .closing-block { position: absolute; z-index: 1; max-width: 420px; }
+  .closing-block--tl { left: 0; top: 2%; }
+  .closing-block--tr { right: 0; left: auto; top: 44%; }
+  .closing-block--bl { left: 0; top: 76%; }
+}
 
 /* ── Footer ────────────────────────────────────────────────────────────── */
 .site-footer {
@@ -531,7 +610,13 @@ html {
 .phone-caption, .still-caption {
   font-family: var(--font-body); font-size: 13px; line-height: 1.6; color: var(--page-soft);
   text-align: center; max-width: 340px; margin: 0;
+  transition: opacity var(--duration-base) ease;
 }
+/* Interaction captions like arc-3's "Pay to follow the application..." only
+   need to instruct once — js/payment-flow.js hides it after the first
+   rs-navigate and restores it on Reset. Opacity only (not display:none) so
+   the figure's height doesn't jump when it disappears. */
+.phone-caption.is-hidden { opacity: 0; }
 
 .phone-controls { display: flex; align-items: center; gap: 14px; }
 .phone-reset {

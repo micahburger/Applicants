@@ -55,6 +55,7 @@ const Icon = {
   battery: () => svg('<rect x="0.75" y="1.75" width="19" height="10.5" rx="2.5" stroke="currentColor" stroke-width="1.2"/><rect x="2.25" y="3.25" width="14.5" height="7.5" rx="1.3" fill="currentColor"/><rect x="20.5" y="5" width="1.5" height="4" rx="0.7" fill="currentColor"/>', '0 0 23 14'),
   chevronUp: () => svg('<path d="M6 15l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'),
   plus: () => svg('<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'),
+  minus: () => svg('<path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'),
   calendar: () => svg('<rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 9.5h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'),
   phone: () => svg('<path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.2 1L6.6 10.8z" fill="currentColor"/>'),
   envelope: () => svg('<rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M4 6.5l8 6 8-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>'),
@@ -127,14 +128,14 @@ function propertyCard(p) {
 }
 
 /* `highlight === 'submitted'` — landing here fresh off the pay → review →
-   submit flow. Marks 789 Birch Blvd Submitted (without mutating the shared
-   PROPERTIES array, since a still-mount elsewhere on the page renders the
-   default state) and shows the "Application sent" toast. */
+   submit flow. Renders 789 Birch Blvd in its normal (not-started) state
+   first, then a beat later animates its pill to Submitted and slides in a
+   confirmation toast — so the status change reads as something that just
+   happened, not something that was already true when the screen appeared.
+   Doesn't mutate the shared PROPERTIES array, since a still-mount elsewhere
+   on the page renders the default state. */
 function applicationsList(highlight) {
   const justSubmitted = highlight === 'submitted';
-  const properties = PROPERTIES.map(p =>
-    justSubmitted && p.address === '789 Birch Blvd, Unit 8' ? { ...p, status: 'submitted', label: 'Submitted' } : p
-  );
 
   const root = h('div', { class: 'product' },
     statusBar({ onHero: true }),
@@ -146,7 +147,7 @@ function applicationsList(highlight) {
         ),
         h('h1', { class: 'rs-hero-title', text: 'Applications' })
       ),
-      h('div', { class: 'rs-list' }, properties.map(propertyCard))
+      h('div', { class: 'rs-list' }, PROPERTIES.map(propertyCard))
     ),
     h('div', { class: 'rs-bottom-bar' },
       h('button', { class: 'rs-btn-primary', text: 'Finish applications' })
@@ -154,10 +155,14 @@ function applicationsList(highlight) {
   );
 
   if (justSubmitted) {
+    const birchCard = Array.from(root.querySelectorAll('.rs-property-card'))
+      .find(card => card.querySelector('.rs-property-address').textContent === '789 Birch Blvd, Unit 8');
+    const birchPill = birchCard && birchCard.querySelector('.rs-pill');
+
     const closeBtn = h('button', { type: 'button', class: 'rs-toast-close', 'aria-label': 'Dismiss' }, Icon.close());
     const toast = h('div', { class: 'rs-toast' },
       h('span', { class: 'rs-toast-icon' }, Icon.info()),
-      h('span', { class: 'rs-toast-text', text: 'Application sent' }),
+      h('span', { class: 'rs-toast-text', text: 'Application submitted for 789 Birch Blvd, Unit 8.' }),
       closeBtn
     );
     root.appendChild(h('div', { class: 'rs-toast-wrap' }, toast));
@@ -170,8 +175,16 @@ function applicationsList(highlight) {
       setTimeout(() => toast.parentElement && toast.parentElement.remove(), 300);
     }
     closeBtn.addEventListener('click', dismiss);
-    requestAnimationFrame(() => toast.classList.add('is-visible'));
-    setTimeout(dismiss, 3000);
+
+    setTimeout(() => {
+      if (!root.isConnected) return;
+      if (birchPill) {
+        birchPill.textContent = 'Submitted';
+        birchPill.classList.add('rs-pill--submitted', 'is-updated');
+      }
+      requestAnimationFrame(() => toast.classList.add('is-visible'));
+    }, 400);
+    setTimeout(dismiss, 3400);
   }
 
   return root;
@@ -297,6 +310,47 @@ function inputRow(labelText, placeholder, minor) {
   );
 }
 
+/* "You click into the empty states, and it autofills in fake information.
+   That's as far as that design needs to go." — tapping into any one empty
+   field in the group fills every empty field in the group at once, so the
+   visitor doesn't have to tap through each field individually to watch the
+   section go from untouched to complete. No validation, no storage, just
+   plausible values dropped in on first focus. */
+function autofillGroupOnFocus(fields) {
+  let filled = false;
+  fields.forEach(([input]) => {
+    input.addEventListener('focus', () => {
+      if (filled) return;
+      filled = true;
+      fields.forEach(([el, fakeValue]) => { if (!el.disabled && !el.value) el.value = fakeValue; });
+    }, { once: true });
+  });
+}
+
+/* Subordinate optional count field — kept visually secondary (small type,
+   muted) since it sits alongside the household question rather than as its
+   own top-level category. See the household() comment for why. */
+function numberStepper(labelText, helperText) {
+  let value = 0;
+  const countEl = h('span', { class: 'rs-stepper-count', text: '0' });
+  const minusBtn = h('button', { type: 'button', class: 'rs-stepper-btn', 'aria-label': `Decrease ${labelText}` }, Icon.minus());
+  const plusBtn = h('button', { type: 'button', class: 'rs-stepper-btn', 'aria-label': `Increase ${labelText}` }, Icon.plus());
+  function render() {
+    countEl.textContent = String(value);
+    minusBtn.disabled = value <= 0;
+  }
+  minusBtn.addEventListener('click', () => { if (value > 0) { value -= 1; render(); } });
+  plusBtn.addEventListener('click', () => { value += 1; render(); });
+  render();
+  return h('div', { class: 'rs-stepper-row' },
+    h('div', { class: 'rs-stepper-copy' },
+      h('p', { class: 'rs-field-label rs-field-label--minor', text: labelText }),
+      helperText ? h('p', { class: 'rs-field-helper', style: 'margin:2px 0 0;', text: helperText }) : null
+    ),
+    h('div', { class: 'rs-stepper' }, minusBtn, countEl, plusBtn)
+  );
+}
+
 /* One tan (--rs-fog) entry panel — "Pet 1", "First additional tenant" —
    with its own remove control. onRemove is optional (the tenant panel isn't
    removable since there's nothing above it to fall back to). */
@@ -349,11 +403,16 @@ function household() {
     tenantsList.appendChild(panel);
   }
   addTenant();
-  const addTenantBtn = h('button', { class: 'rs-add-row', type: 'button' }, Icon.plus(), h('span', { text: '+ additional tenant' }));
+  const addTenantBtn = h('button', { class: 'rs-add-row', type: 'button' }, Icon.plus(), h('span', { text: 'Add additional tenant' }));
   addTenantBtn.addEventListener('click', addTenant);
 
   const tenantsReveal = revealPanel(h('div', {}, tenantsList, addTenantBtn));
   const tenantsRadio = radioYesNo(v => tenantsReveal._setOpen(v === true));
+
+  /* Children under 18 — deliberately not its own category alongside Pets
+     and Additional tenants. Kept as a subordinate, optional count inside
+     the household question so it can't read as a familial-status filter. */
+  const childrenStepper = numberStepper('Children under 18', 'Optional — helps us plan for household size.');
 
   scrollEl.append(
     stepHeader({ title: '789 Birch Blvd, Unit 8', step: 1, total: 4 }),
@@ -372,7 +431,8 @@ function household() {
       h('p', { class: 'rs-field-helper', text: "List anyone 18 or over who will live here.", style: 'margin-top:-8px;' }),
       h('p', { class: 'rs-field-label', text: 'Will anyone else live here with you?', style: 'margin-top:14px;' }),
       tenantsRadio,
-      tenantsReveal
+      tenantsReveal,
+      childrenStepper
     )
   );
 
@@ -644,26 +704,20 @@ function payment() {
     payBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'loader' } }));
   });
 
-  // "You click into the empty states, and it autofills in fake information.
-  // That's as far as that design needs to go." — no validation, no storage,
-  // just a plausible value dropped in on first focus.
-  function autofillOnFocus(input, fakeValue) {
-    input.addEventListener('focus', () => {
-      if (!input.value) input.value = fakeValue;
-    }, { once: true });
-  }
   const cardNumberInput = h('input', { type: 'text', inputmode: 'numeric', placeholder: 'Card number', autocomplete: 'off' });
   const expirationInput = h('input', { type: 'text', placeholder: 'Expiration (MM/YY)', autocomplete: 'off' });
   const cvcInput = h('input', { type: 'text', inputmode: 'numeric', placeholder: 'CVC', autocomplete: 'off' });
-  autofillOnFocus(cardNumberInput, '4242 4242 4242 4242');
-  autofillOnFocus(expirationInput, '12/29');
-  autofillOnFocus(cvcInput, '123');
+  autofillGroupOnFocus([
+    [cardNumberInput, '4242 4242 4242 4242'],
+    [expirationInput, '12/29'],
+    [cvcInput, '123'],
+  ]);
 
   const scrollEl = h('div', { class: 'rs-scroll' },
     stepHeader({ title: '789 Birch Blvd, Unit 8', step: 2, total: 2 }),
     h('div', { class: 'rs-page-head' },
       h('h1', { class: 'rs-h1', text: 'Confirm and pay' }),
-      h('p', { class: 'rs-subtitle', text: 'Your reports run as soon as you submit.' })
+      h('p', { class: 'rs-subtitle', text: 'Your reports start running once you pay.' })
     ),
     h('div', { class: 'rs-card' }, totalRow, breakdown),
     h('div', { class: 'rs-card' }, screeningRow),
@@ -689,18 +743,20 @@ function payment() {
 }
 
 /* ============================================================================
-   5a. loader — "Hang tight" post-Pay screen. Checklist rows build in one at
-   a time on a timer, each holding long enough to read before it flips to
-   done, then auto-navigates into reviewReport. No header/back — this step
-   isn't interactive or interruptible, matching the refs.
+   5a. loader — "Preparing your reports" post-Pay screen. Checklist rows
+   build in one at a time on a timer, each holding long enough to read
+   before it flips to done, then auto-navigates into reviewReport. No
+   header/back — this step isn't interactive or interruptible, matching the
+   refs. Deliberately never says "submitted" or "sent" — reports are being
+   prepared, not shared with the agent yet. That only happens after the
+   applicant reviews them and hits Submit application in reviewReport().
    ============================================================================ */
 
 const LOADER_STEPS = [
-  'Processing your payment',
-  'Sending your application to Jordan',
-  'Verifying your identity',
-  'Running your credit and background checks',
-  'Getting your reports ready for you to review',
+  'Running credit report',
+  'Running background check',
+  'Checking eviction history',
+  'Ready for review',
 ];
 
 function loader() {
@@ -718,7 +774,8 @@ function loader() {
     statusBar(),
     h('div', { class: 'rs-scroll' },
       h('div', { class: 'rs-page-head', style: 'padding-top:28px;' },
-        h('h1', { class: 'rs-h1', text: "Hang tight. We're running your reports." })
+        h('h1', { class: 'rs-h1', text: 'Preparing your reports' }),
+        h('p', { class: 'rs-subtitle', text: "Your application hasn't been sent to the agent yet." })
       ),
       h('div', { class: 'rs-checklist' }, items.map(item => item.row))
     )
@@ -758,22 +815,50 @@ function loader() {
 }
 
 /* ============================================================================
-   5b. reviewReport — "Review your reports" credit/background check summary.
-   Reuses .rs-card/.rs-row from review(). The reviewed checkbox is optional
-   per the refs (not required to submit). Submit navigates to
-   applicationsList with value 'submitted' to show the Submitted status +
-   toast back on the applications list.
+   5b. reviewReport — "Review your reports". Each report card has its own
+   Ready/Reviewed toggle (cosmetic — reviewing an individual card doesn't
+   gate Submit). Submit application only unlocks once the applicant checks
+   the confirmation row, and only this action actually sends anything to
+   the agent — navigates to applicationsList with value 'submitted' to show
+   the Submitted status + toast back on the applications list.
    ============================================================================ */
+
+/* One simplified report card — no realistic credit/background/eviction
+   data, just enough to show a Ready -> Reviewed interaction. */
+function reportCard(title, desc) {
+  const pill = h('span', { class: 'rs-pill', text: 'Ready' });
+  const btn = h('button', { type: 'button', class: 'rs-outline-btn', text: 'Review report' });
+  let reviewed = false;
+  btn.addEventListener('click', () => {
+    reviewed = !reviewed;
+    pill.textContent = reviewed ? 'Reviewed' : 'Ready';
+    pill.classList.toggle('rs-pill--submitted', reviewed);
+    btn.textContent = reviewed ? 'Reviewed' : 'Review report';
+  });
+  return h('div', { class: 'rs-card' },
+    h('div', { class: 'rs-card-header' }, h('p', { class: 'rs-card-title', text: title }), pill),
+    h('p', { class: 'rs-card-desc', text: desc }),
+    btn
+  );
+}
 
 function reviewReport() {
   const reviewedMark = h('div', { class: 'rs-checkbox' }, Icon.check());
   const reviewedRow = h('div', { class: 'rs-checkbox-row', role: 'checkbox', 'aria-checked': 'false', tabindex: '0' },
     reviewedMark,
-    h('div', { class: 'rs-checkbox-copy' }, h('p', { class: 'rs-checkbox-title', text: "I've reviewed my reports" }))
+    h('div', { class: 'rs-checkbox-copy' }, h('p', { class: 'rs-checkbox-title', text: "I confirm that I've reviewed my reports." }))
   );
+
+  const submitBtn = h('button', { class: 'rs-btn-primary', text: 'Submit application', disabled: true });
+  submitBtn.addEventListener('click', () => {
+    if (submitBtn.disabled) return;
+    submitBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'applicationsList', value: 'submitted' } }));
+  });
+
   function toggleReviewed() {
     const checked = reviewedMark.classList.toggle('is-checked');
     reviewedRow.setAttribute('aria-checked', String(checked));
+    submitBtn.disabled = !checked;
   }
   reviewedRow.addEventListener('click', toggleReviewed);
   reviewedRow.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleReviewed(); } });
@@ -787,49 +872,17 @@ function reviewReport() {
     closeBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'back' } }));
   });
 
-  function readyPill() { return h('span', { class: 'rs-pill rs-pill--submitted', text: 'Ready' }); }
-  function cardHeader(title) {
-    return h('div', { class: 'rs-card-header' }, h('p', { class: 'rs-card-title', text: title }), readyPill());
-  }
-
   const scrollEl = h('div', { class: 'rs-scroll' },
     h('div', { class: 'rs-navbar' }, backBtn, h('span', { class: 'rs-navbar-title', text: '789 Birch Blvd, Unit 8' }), closeBtn),
     h('div', { class: 'rs-page-head' },
       h('h1', { class: 'rs-h1', text: 'Review your reports' }),
-      h('p', { class: 'rs-subtitle', text: 'Check these over, then send them to Jordan to finish.' })
+      h('p', { class: 'rs-subtitle', text: 'Check your reports before sending your application to Jordan Blake.' })
     ),
-    h('div', { class: 'rs-card' },
-      cardHeader('Credit report'),
-      h('div', { class: 'rs-row' }, h('span', { class: 'rs-row-label', text: 'TransUnion score' }), h('span', { class: 'rs-row-value rs-row-value--score', text: '742' })),
-      reviewRow('Tradelines', '5 active, 2 closed'),
-      reviewRow('Credit inquiries', '2'),
-      reviewRow('Collections', '0 open, 0 closed'),
-      reviewRow('Public records', '0'),
-      h('div', { class: 'rs-note-box' }, h('p', { text: 'No late payments across 7 accounts. Low utilization and a long, clean history.' })),
-      h('button', { type: 'button', class: 'rs-outline-btn', text: 'View full report' })
-    ),
-    h('div', { class: 'rs-card' },
-      cardHeader('Reference check'),
-      h('p', { class: 'rs-card-desc', text: 'Requests sent to the 2 references you gave us.' }),
-      h('button', { type: 'button', class: 'rs-outline-btn', text: 'View references' })
-    ),
-    h('div', { class: 'rs-card' },
-      cardHeader('Background check'),
-      h('p', { class: 'rs-card-desc', text: '1 record found. National, county, and sex-offender registries across 50 states.' }),
-      h('button', { type: 'button', class: 'rs-outline-btn', text: 'View report' })
-    ),
-    h('div', { class: 'rs-card' },
-      cardHeader('Eviction record'),
-      h('p', { class: 'rs-card-desc', text: '1 record found. Filings in the nationwide eviction database.' }),
-      h('button', { type: 'button', class: 'rs-outline-btn', text: 'View report' })
-    ),
+    reportCard('Credit report', 'A summary of your credit history and open accounts.'),
+    reportCard('Background check', 'National and county criminal record search.'),
+    reportCard('Eviction history', 'Nationwide eviction filing search.'),
     h('div', { class: 'rs-reviewed-row' }, reviewedRow)
   );
-
-  const submitBtn = h('button', { class: 'rs-btn-primary', text: 'Submit application' });
-  submitBtn.addEventListener('click', () => {
-    submitBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'applicationsList', value: 'submitted' } }));
-  });
 
   return h('div', { class: 'product' },
     statusBar(),
@@ -852,26 +905,23 @@ function fieldWithIcon(inputEl, iconFn) {
 }
 
 function yourDetails() {
-  function autofillOnFocus(input, fakeValue) {
-    input.addEventListener('focus', () => {
-      if (!input.value) input.value = fakeValue;
-    }, { once: true });
-  }
-
   const firstNameInput = h('input', { type: 'text', placeholder: 'First name', autocomplete: 'off' });
   const lastNameInput = h('input', { type: 'text', placeholder: 'Last name', autocomplete: 'off' });
   const dobInput = h('input', { type: 'text', placeholder: 'Date of birth', autocomplete: 'off' });
   const phoneInput = h('input', { type: 'tel', placeholder: 'Phone number', autocomplete: 'off' });
   const emailInput = h('input', { type: 'email', placeholder: 'Email', autocomplete: 'off' });
-  autofillOnFocus(firstNameInput, 'Taylor');
-  autofillOnFocus(lastNameInput, 'Morgan');
-  autofillOnFocus(dobInput, 'Apr 18, 1992');
-  autofillOnFocus(phoneInput, '(512) 555-0134');
-  autofillOnFocus(emailInput, 'taylor.morgan@example.com');
 
   const noMiddleMark = h('div', { class: 'rs-checkbox' }, Icon.check());
   const middleNameInput = h('input', { type: 'text', placeholder: 'Middle name', autocomplete: 'off' });
-  autofillOnFocus(middleNameInput, 'Reese');
+
+  autofillGroupOnFocus([
+    [firstNameInput, 'Taylor'],
+    [lastNameInput, 'Morgan'],
+    [dobInput, 'Apr 18, 1992'],
+    [phoneInput, '(512) 555-0134'],
+    [emailInput, 'taylor.morgan@example.com'],
+    [middleNameInput, 'Reese'],
+  ]);
   const noMiddleRow = h('div', { class: 'rs-checkbox-row', role: 'checkbox', 'aria-checked': 'false', tabindex: '0' },
     noMiddleMark,
     h('div', { class: 'rs-checkbox-copy' }, h('p', { class: 'rs-checkbox-title', text: 'I have no middle name' }))

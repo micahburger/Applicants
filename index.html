@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Rental Application, Rebuilt — Micah Lindenberger</title>
-<meta name="description" content="A case study on redesigning the RentSpree rental application as a purchase flow — from form to conversion." />
+<title>Rental Application, Rebuilt · Micah Lindenberger</title>
+<meta name="description" content="A case study on redesigning the RentSpree rental application, from the first form field through payment and final submission." />
 <link rel="stylesheet" href="css/styles.css" />
 <link rel="stylesheet" href="css/product.css" />
 </head>
@@ -39,14 +39,14 @@
     <div class="wrap reveal">
       <div class="split">
         <div>
-          <p class="label eyebrow">The argument</p>
-          <h2 class="display section-headline">The application is where the money moves. It was built to collect information, not to complete a transaction.</h2>
-          <p class="section-body">There are several revenue paths in the business — agent subscriptions, landlord services — but the application carries the most transactions and the most money. So the redesign treats it as a conversion problem, not a form problem.</p>
-          <p class="pull-line" style="margin-top: 32px;">Fewer people dropping out. Information that's actually correct. A payment relationship that carries forward once someone's accepted.</p>
+          <p class="label eyebrow">Business impact</p>
+          <h2 class="display section-headline">Most of the business runs through the application.</h2>
+          <p class="section-body">RentSpree has other revenue streams, including agent subscriptions and landlord services. But applications carry most of the transactions and most of the revenue. Improving completion here has a direct effect on the business.</p>
+          <p class="section-body">The redesign focused on helping more applicants finish and improving the information agents receive. It also created a path from the first application payment to deposits and rent after approval.</p>
         </div>
         <div class="split-visual">
           <div class="still-mount" data-screen="applications-list" data-size="sm"
-               data-caption="Three properties. Three states. Three transactions."></div>
+               data-caption="One applicant, three separate transactions."></div>
         </div>
       </div>
     </div>
@@ -55,28 +55,28 @@
   <!-- ═══ 3 · DIAGNOSIS ══════════════════════════════════════════════════ -->
   <section id="diagnosis">
     <div class="wrap reveal">
-      <p class="label eyebrow">What was leaking</p>
-      <h2 class="display section-headline">Three places people fell out.</h2>
+      <p class="label eyebrow">The problem</p>
+      <h2 class="display section-headline">Where the application broke down.</h2>
       <div class="diagnosis-list">
         <div class="diagnosis-item">
           <span class="num">01</span>
           <div>
-            <h3>No sense of scale or place</h3>
-            <p>Applicants couldn't tell how much was left or where they were. A rental application isn't a session — it's an errand people do across several sittings, with documents they have to go find.</p>
+            <h3>No clear sense of progress</h3>
+            <p>A rental application rarely happens in one sitting. Applicants stop to find documents, confirm details, or come back later. The old flow didn't tell them how much was left or where they should resume.</p>
           </div>
         </div>
         <div class="diagnosis-item">
           <span class="num">02</span>
           <div>
-            <h3>Errors surfacing too late</h3>
-            <p>People found out their information was wrong only after the background and credit checks came back with problems. By then the report had been pulled.</p>
+            <h3>User errors caught after reports were pulled</h3>
+            <p>Applicants sometimes discovered a typo or outdated information only after their credit or background reports came back. By then the reports had already been run, with no clear opportunity to correct the source information.</p>
           </div>
         </div>
         <div class="diagnosis-item">
           <span class="num">03</span>
           <div>
-            <h3>A completion illusion at submit</h3>
-            <p>People believed they were done at submit, when report review and sharing still remained. "Submitted" was doing double duty across the flow and the confirmation email.</p>
+            <h3>Unclear when the application was actually submitted</h3>
+            <p>Applicants couldn't tell when their application and reports had been sent to the agent. The experience looked finished while important review and confirmation steps still remained.</p>
           </div>
         </div>
       </div>
@@ -87,8 +87,9 @@
   <section id="arc-1">
     <div class="wrap reveal">
       <p class="label eyebrow">Arc one</p>
-      <h2 class="display section-headline">Knowing where you are.</h2>
-      <p class="section-body">Fewer steps was the baseline move. The overview page is the real one: completion state at the end of each step, edit in place as you go, save and return whenever. It's designed for resumption, not completion in one pass — that's what the errand insight buys you, and it's why the overview is the spine of the flow rather than a nav convenience.</p>
+      <h2 class="display section-headline">Designed to be picked back up.</h2>
+      <p class="section-body">Reducing the number of steps helped, but the bigger change was giving the application a visible structure. The overview shows everything that remains, keeps completed work visible, and lets applicants edit finished sections without retracing the flow.</p>
+      <p class="section-body">It also gives people a clear place to return. That matters for something usually completed over several sittings.</p>
 
       <div class="moment">
         <p class="moment-heading">Moment one</p>
@@ -97,10 +98,10 @@
                data-caption="Click in — then switch between a fresh application and a resumed one"
                data-states='["Resumed","Not started"]'></div>
           <ol class="notes">
-            <li><span class="n">01</span><span>A finished step trades its number for a check and gains an Edit. The step you're up to keeps its number and stays quiet. Nothing else moves.</span></li>
-            <li><span class="n">02</span><span>The button changes with the state — Start application on a fresh one, Continue on a resumed one. Same page doing two jobs, which is what makes it a spine rather than a launcher.</span></li>
-            <li><span class="n">03</span><span>Edit appears only where there's something to edit, so correcting an answer never means walking back through the flow to reach it.</span></li>
-            <li><span class="n">04</span><span>The agent receiving it is named at the top. People are handing over a credit file — they should know who's on the other end.</span></li>
+            <li><span class="n">01</span><span>When a step is complete, its number becomes a check and an Edit action appears. The current step keeps its number so it's always clear what comes next.</span></li>
+            <li><span class="n">02</span><span>The primary action changes from Start application to Continue when someone returns.</span></li>
+            <li><span class="n">03</span><span>Edit only appears on completed sections. Correcting an answer never means walking backward through the entire flow.</span></li>
+            <li><span class="n">04</span><span>The agent receiving the application is named at the top. Applicants are sharing sensitive financial information, so they should know who will receive it.</span></li>
           </ol>
         </div>
       </div>
@@ -109,13 +110,17 @@
 
       <div class="moment">
         <p class="moment-heading">Moment two</p>
+        <h3 class="moment-title">Keeping progress predictable.</h3>
+        <p class="section-body" style="margin-bottom: 24px;">Conditional questions open inline instead of adding new steps to the application. This keeps the progress model stable as the form changes.</p>
+        <p class="section-body" style="margin-bottom: 24px;">The household section also required a compliance decision. The number of children under 18 stays subordinate and optional rather than appearing as a category alongside adults and pets. This reduces the risk of creating a familial-status signal.</p>
+        <p class="section-body" style="margin-bottom: 24px;">That decision was separate from conversion. It was simply the safer way to handle the information.</p>
         <div class="moment-layout">
           <div class="phone-mount" data-screen="household"
                data-caption="Tap Yes on either question and the fields open inline"></div>
           <ol class="notes">
-            <li><span class="n">01</span><span>Inline disclosure, not a counter pre-step. A pre-step makes step count variable, which breaks the progress indicator I'd just built.</span></li>
-            <li><span class="n">02</span><span>The stronger reason: a children counter sitting parallel to adults and pets creates a familial status signal. Keeping the under-18 count subordinate and clearly optional is the safer treatment.</span></li>
-            <li><span class="n">03</span><span>That second argument has nothing to do with conversion. Compliance should win on its own terms.</span></li>
+            <li><span class="n">01</span><span>Inline disclosure keeps the step count fixed, so the progress indicator stays accurate as the form changes.</span></li>
+            <li><span class="n">02</span><span>The count of children under 18 sits subordinate to the household question, rather than as its own category next to adults and pets.</span></li>
+            <li><span class="n">03</span><span>That treatment was chosen to limit familial-status signals, a compliance requirement independent of conversion.</span></li>
           </ol>
         </div>
       </div>
@@ -126,28 +131,27 @@
   <section id="arc-2">
     <div class="wrap reveal">
       <p class="label eyebrow">Arc two</p>
-      <h2 class="display section-headline">Catching errors before they cost money.</h2>
-      <p class="section-body">This came from support. Applicants were telling us, after they submitted, that their credit or background check came back with errors — and the reason was that their own information was wrong. A misspelled name, an old address, a transposed digit. They hadn't caught it, and there was no point in the flow where we'd asked them to.</p>
-
-      <p class="pull-quote" style="margin-top: 32px;">By the time the error surfaces, the report has already been pulled. The fix wasn't better validation. It was giving people a real chance to look at what they'd entered before anything irreversible happened.</p>
 
       <div class="moment">
-        <div class="moment-layout">
-          <div class="phone-mount" data-screen="review"
-               data-caption="Every section is editable right up to the moment it isn't"></div>
+        <div class="moment-layout" id="review-layout">
+          <div class="moment-text">
+            <div class="moment-text-top">
+              <h2 class="display section-headline">Catching errors before they cost money.</h2>
+              <p class="section-body">This came from support. Applicants were contacting us after submission because something in their credit or background report was wrong. Often, the source was information they had entered themselves: a misspelled legal name, an old address, or a transposed digit.</p>
+              <p class="section-body">The flow never gave them a clear moment to check everything.</p>
+            </div>
+            <div class="moment-text-bottom">
+              <div class="moment-hairline"></div>
+              <p class="section-body moment-followup">Once the mistake appeared in a report, the report had already been pulled. Field validation wouldn't catch every error, so applicants needed a full review before anything was sent to the bureau.</p>
+            </div>
+          </div>
+          <div class="phone-mount" data-screen="review" data-size="sm"></div>
           <ol class="notes">
-            <li><span class="n">01</span><span>Edit on every section, not one "go back and fix it" link at the bottom.</span></li>
+            <li><span class="n">01</span><span>Every section can be edited directly from the review page. Applicants can correct an answer while they still have control over it.</span></li>
             <li><span class="n">02</span><span>"Check everything before it goes to Jordan. You can still edit." The description names the person and the deadline in one line.</span></li>
             <li><span class="n">03</span><span>Nothing irreversible has happened yet. That's the whole reason this sits before the bureau call.</span></li>
           </ol>
         </div>
-      </div>
-
-      <p class="section-body" style="margin-top: 8px;">And again on the way out: applicants review their reports before anything goes to the agent.</p>
-      <p class="section-body" style="margin-top: 16px;">Two different guarantees. Check your inputs. See your outputs.</p>
-
-      <div class="divider-strip" style="margin-top: 56px;">
-        <p>Running underneath all three: a full pass on section titles, page titles, descriptions, and form patterns. Titles say what. Descriptions say why, capped around twelve words. No internal jargon in applicant-facing copy — "Screening reports" became "Credit and background."</p>
       </div>
     </div>
   </section>
@@ -156,61 +160,88 @@
   <section id="arc-3">
     <div class="wrap reveal">
       <p class="label eyebrow">Arc three</p>
-      <h2 class="display section-headline">Sequencing the money.</h2>
-      <p class="section-body">Payment moved after review, for two reasons: applicants know what they're paying for, and errors get caught before the bureau call. The reuse upsell sits at that same moment — apply to as many properties as you like for 30 days, add-ons priced separately. The placement is the argument. The upsell only makes sense once someone has seen how much work they just did.</p>
+      <h2 class="display section-headline">Putting payment in the right place.</h2>
+      <p class="section-body">Moving payment later was one of the biggest changes in the flow. Applicants now complete and review their information before they pay. By that point, they understand what the fee covers, and mistakes can still be corrected before reports run.</p>
+      <p class="section-body">Previous testing showed a tradeoff. Later payment created some additional drop-off, but the submissions that made it through were more complete. The reusable package also makes more sense here, after applicants understand how much work it can save on the next property.</p>
 
       <div class="moment">
-        <div class="moment-layout">
+        <div class="moment-layout" id="payment-flow-layout">
           <div class="phone-mount" data-screen="payment"
-               data-caption="Expand the total, toggle the package, watch the cart hold steady"></div>
-          <ol class="notes">
-            <li><span class="n">01</span><span>Payment sits after review, so applicants know what they're buying and errors are already caught.</span></li>
-            <li><span class="n">02</span><span>The reuse package is priced as an add-on and says so — toggling it doesn't disturb anything else in the cart.</span></li>
-            <li><span class="n">03</span><span>Save this card is optional and sits at a moment they're already paying.</span></li>
-          </ol>
+               data-caption="Pay to follow the application through final submission."></div>
+          <div class="annotate-panel">
+            <div class="notes-group" data-for="payment">
+              <p class="notes-title">Confirm and pay</p>
+              <ol class="notes">
+                <li><span class="n">01</span><span>Payment follows the application review, so applicants know what they're paying for before reports run.</span></li>
+                <li><span class="n">02</span><span>The reusable package appears after applicants have experienced the full application and understand how much work reuse can save.</span></li>
+                <li><span class="n">03</span><span>Saving the card is optional, but it creates a path to deposits and rent after approval.</span></li>
+              </ol>
+            </div>
+            <div class="notes-group" data-for="loader">
+              <p class="notes-title">Preparing your reports</p>
+              <ol class="notes">
+                <li><span class="n">01</span><span>The loader shows each report being prepared instead of leaving applicants in an unclear waiting state.</span></li>
+                <li><span class="n">02</span><span>The application has not been sent yet. That remains explicit while the reports run.</span></li>
+              </ol>
+            </div>
+            <div class="notes-group" data-for="reviewReport">
+              <p class="notes-title">Review your reports</p>
+              <ol class="notes">
+                <li><span class="n">01</span><span>Applicants review their credit, background, and eviction reports before anything is shared with the agent.</span></li>
+                <li><span class="n">02</span><span>Submit application appears only after they confirm their review. This is the moment the application is sent to Jordan.</span></li>
+              </ol>
+            </div>
+            <div class="notes-group" data-for="applicationsList">
+              <p class="notes-title">Applications</p>
+              <ol class="notes">
+                <li><span class="n">01</span><span>The applicant returns to the same overview where the application started.</span></li>
+                <li><span class="n">02</span><span>The property changes to a green Submitted state, and a toast confirms the address.</span></li>
+              </ol>
+            </div>
+          </div>
         </div>
       </div>
 
-      <p class="pull-line" style="margin-top: 8px;">Three applications open at once is the normal case, not the edge case — that's the screen from the top of this page, and it's the reason a 30-day package means anything.</p>
-
-      <div class="closing-card" style="margin-top: 40px;">
-        <p>On saving the card: the next steps after this flow are accepting an applicant, then a deposit, then recurring rent. This is where the payment relationship starts. Designed as a one-time transaction, that door closes.</p>
+      <div class="closing-card" id="payment-flow-closing" style="margin-top: 40px;">
+        <p>Applicants now move through a sequence they can follow: pay, wait for the reports, review them, and decide when to send the application. The final handoff is no longer implied. Submit application sends it to the agent, and the overview confirms exactly which property was completed. Saving the card also connects this first transaction to what happens next: approval, a deposit, and recurring rent.</p>
       </div>
     </div>
   </section>
 
-  <!-- ═══ 7 · INFLUENCE ══════════════════════════════════════════════════ -->
-  <section id="influence">
-    <div class="wrap reveal">
-      <p class="label eyebrow">How it got built</p>
-      <h2 class="display section-headline">Getting measurement onto the roadmap.</h2>
-      <p class="section-body">The abandonment instrumentation was competing with feature work and wasn't winning on UX arguments. So I reframed it as a margin question for my engineering partners: an application abandoned before the report is pulled costs nothing in bureau fees, which makes recovered abandonment close to pure contribution margin. It made the build slice.</p>
-      <p class="section-body" style="margin-top: 20px;">I also built the design-to-code prototype pipeline and scaled it to the team, which is why you're clicking through working code on this page instead of static frames.</p>
-    </div>
-  </section>
-
-  <!-- ═══ 8 · OPEN AND CLOSE ═════════════════════════════════════════════ -->
+  <!-- ═══ 7 · CLOSE — three text blocks scattered around the closing photo,
+       all one composite group. Desktop-only positioning; see .closing-block
+       in styles.css for why mobile just stacks in document order instead. -->
   <section id="close">
     <div class="wrap reveal">
-      <p class="label eyebrow">Still open</p>
-      <ul class="still-list">
-        <li>Household step is pending alignment with engineering.</li>
-        <li>Individual versus batch decisions for applicant groups is in research.</li>
-        <li>Renewal and expired states were scoped out deliberately, with guards in the code so they don't creep back in.</li>
-      </ul>
+      <div class="closing-composite">
+        <div class="closing-block closing-block--tl">
+          <h2 class="display section-headline">Making abandonment measurable</h2>
+          <p class="section-body">To improve completion, we needed to know exactly where applicants were leaving. I worked with engineering to add tracking across the new flow so we could see which sections were causing problems and what changed after each release.</p>
+        </div>
 
-      <h2 class="display" style="margin-top: 100px; max-width: 820px;">Fewer drop-offs. Better information. A payment relationship that survives the accept.</h2>
-      <p class="section-body" style="margin-top: 20px; color: var(--page-muted);">All three serve the same thing — a landlord who trusts what they're looking at, and an applicant who doesn't have to start over.</p>
+        <div class="closing-image" aria-hidden="true"></div>
+
+        <div class="closing-block closing-block--tr">
+          <h2 class="display section-headline">An AI-empowered workflow to design and build</h2>
+          <p class="section-body">Using Claude Code, I built the prototype with buttons, form controls, and patterns from our design system. I worked closely with the design team to keep those components consistent while I focused on the UX, information architecture, content, and overall application workflow.</p>
+          <p class="section-body">Because the prototype worked like the product, I could move entire sections, test different sequences, and review decisions with design, product, and engineering in one connected experience.</p>
+        </div>
+
+        <div class="closing-block closing-block--bl">
+          <h2 class="display section-headline">From applicant to tenant</h2>
+          <p class="section-body">Clearer reports help agents and landlords screen with more confidence. Once someone is accepted, a saved payment method makes it easier to move into deposits and rent, beginning the landlord-tenant relationship.</p>
+        </div>
+      </div>
     </div>
   </section>
 
   <footer class="site-footer">
-    <span>Micah Burger &middot; Product Designer &middot; 2026</span>
-    <a href="https://micahburger.com">micahburger.com</a>
+    <a href="https://www.micahburger.com">Micahburger.com</a>
   </footer>
 
   <script src="js/screens.js"></script>
   <script src="js/phone.js"></script>
+  <script src="js/payment-flow.js"></script>
   <script src="js/shell.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>

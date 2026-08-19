@@ -78,6 +78,9 @@
 .rs-btn-primary:hover { opacity: .9; }
 .rs-btn-primary:active { transform: scale(.98); opacity: .82; }
 .rs-btn-primary:focus-visible { outline: 2px solid var(--rs-signal); outline-offset: 2px; }
+.rs-btn-primary:disabled {
+  opacity: .35; cursor: not-allowed; pointer-events: none;
+}
 
 /* ── Icon buttons (nav, circular arrow) ───────────────────────────────── */
 .rs-icon-btn {
@@ -223,8 +226,19 @@
 .rs-pill {
   display: inline-block; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 999px;
   background: var(--rs-paper); border: 1px solid rgba(26, 26, 24, 0.1); color: var(--rs-ink);
+  transition: background-color var(--duration-slow, .25s) var(--ease-enter, ease),
+              color var(--duration-slow, .25s) var(--ease-enter, ease),
+              border-color var(--duration-slow, .25s) var(--ease-enter, ease);
 }
-.rs-pill--submitted { background: var(--rs-mint); color: var(--rs-moss); }
+.rs-pill--submitted { background: var(--rs-mint); color: var(--rs-moss); border-color: transparent; }
+/* One-shot pulse when a pill flips to Submitted live (applicationsList's
+   post-submit animation) — noticeable without being showy. */
+.rs-pill.is-updated { animation: rsPillPulse .4s var(--ease-enter, ease); }
+@keyframes rsPillPulse {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
 
 /* ── Household: stacked radio rows + progressive disclosure ───────────── */
 .rs-field-group { padding: 0 20px 20px; }
@@ -306,6 +320,21 @@
 .rs-input-row--minor { opacity: .8; }
 .rs-input-row--minor label { font-weight: 500; }
 .rs-input-row--minor input { max-width: 120px; }
+
+/* Subordinate stepper — children under 18. Deliberately quieter than the
+   Yes/No rows above it: smaller label, muted opacity, no card background. */
+.rs-stepper-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(26, 26, 24, 0.1); opacity: .85; }
+.rs-stepper-copy .rs-field-label--minor { font-size: 13px; font-weight: 500; margin: 0; }
+.rs-stepper { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.rs-stepper-btn {
+  width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(26, 26, 24, 0.2);
+  background: var(--rs-paper); color: var(--rs-ink); display: flex; align-items: center; justify-content: center;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+.rs-stepper-btn:hover:not(:disabled) { background: rgba(26, 26, 24, 0.05); border-color: rgba(26, 26, 24, 0.32); }
+.rs-stepper-btn:disabled { opacity: .35; }
+.rs-stepper-btn:focus-visible { outline: 2px solid var(--rs-signal); outline-offset: 2px; }
+.rs-stepper-count { font-size: 15px; font-weight: 600; min-width: 16px; text-align: center; }
 
 /* ── Payment: total, package, card fields ─────────────────────────────── */
 .rs-total-row {
