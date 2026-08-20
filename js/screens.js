@@ -487,6 +487,16 @@ function reviewLinkRow(label) {
 }
 
 function review() {
+  // Only Basic info's Edit is wired up — it's the one section with a real
+  // second screen (yourDetails) behind it, so it's the one worth showing
+  // the full loop on: edit, land on a prefilled form, Continue, land back
+  // here. The other cards' Edit buttons don't have a matching screen built
+  // out, so they stay inert rather than navigate somewhere half-real.
+  const basicInfoEditBtn = h('button', { class: 'rs-edit-btn', text: 'Edit' });
+  basicInfoEditBtn.addEventListener('click', () => {
+    basicInfoEditBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'yourDetails', value: 'fromReview' } }));
+  });
+
   const scrollEl = h('div', { class: 'rs-scroll' },
       stepHeader({ title: '789 Birch Blvd, Unit 8', step: 1, total: 2 }),
       h('div', { class: 'rs-page-head' },
@@ -496,7 +506,7 @@ function review() {
       h('div', { class: 'rs-card' },
         h('div', { class: 'rs-card-header' },
           h('p', { class: 'rs-card-title', text: 'Basic info' }),
-          h('button', { class: 'rs-edit-btn', text: 'Edit' })
+          basicInfoEditBtn
         ),
         reviewRow('Full legal name', 'Taylor Reese Morgan'),
         reviewRow('Date of birth', 'Apr 18, 1992'),
@@ -916,7 +926,13 @@ function fieldWithIcon(inputEl, iconFn) {
   return h('div', { class: 'rs-field-icon-wrap' }, inputEl, h('span', { class: 'rs-field-icon' }, iconFn()));
 }
 
-function yourDetails() {
+function yourDetails(mode) {
+  // Reached two ways: fresh from overview (fields start empty, autofill on
+  // first focus — the "watch it go from untouched to complete" demo), or
+  // from review's Basic info Edit (mode === 'fromReview'), where the point
+  // is showing the edit loop itself, so the form should already read as
+  // "this is what's on file" rather than empty.
+  const fromReview = mode === 'fromReview';
   const firstNameInput = h('input', { type: 'text', placeholder: 'First name', autocomplete: 'off' });
   const lastNameInput = h('input', { type: 'text', placeholder: 'Last name', autocomplete: 'off' });
   const dobInput = h('input', { type: 'text', placeholder: 'Date of birth', autocomplete: 'off' });
@@ -926,14 +942,19 @@ function yourDetails() {
   const noMiddleMark = h('div', { class: 'rs-checkbox' }, Icon.check());
   const middleNameInput = h('input', { type: 'text', placeholder: 'Middle name', autocomplete: 'off' });
 
-  autofillGroupOnFocus([
+  const fieldValues = [
     [firstNameInput, 'Taylor'],
     [lastNameInput, 'Morgan'],
     [dobInput, 'Apr 18, 1992'],
     [phoneInput, '(512) 555-0134'],
     [emailInput, 'taylor.morgan@example.com'],
     [middleNameInput, 'Reese'],
-  ]);
+  ];
+  if (fromReview) {
+    fieldValues.forEach(([el, value]) => { el.value = value; });
+  } else {
+    autofillGroupOnFocus(fieldValues);
+  }
   const noMiddleRow = h('div', { class: 'rs-checkbox-row', role: 'checkbox', 'aria-checked': 'false', tabindex: '0' },
     noMiddleMark,
     h('div', { class: 'rs-checkbox-copy' }, h('p', { class: 'rs-checkbox-title', text: 'I have no middle name' }))

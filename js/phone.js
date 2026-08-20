@@ -126,7 +126,11 @@ function buildPhone(mountEl) {
     // check and deactivated the phone it had just acted on.
     if (figure.contains(e.target)) return;
     deactivate();
-  });
+  }, true); // capture — any in-phone rs-navigate (Continue, back, Pay, Submit…)
+  // swaps the screen via screenSlot.innerHTML on the way up through this
+  // same click, which detaches the clicked button before the bubble phase
+  // reaches here; a detached node always fails frame.contains(), so this
+  // has to read e.target before that mutation happens, not after.
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && frame.classList.contains('is-live')) {
       deactivate();

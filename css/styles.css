@@ -613,10 +613,17 @@ html {
      viewport actually has room — no separate narrow-desktop layout needed. */
   .closing-text-col {
     align-items: flex-start; gap: 64px; flex: 0 1 460px; min-width: 300px;
+    position: relative; z-index: 1; /* stack above the photo — see .closing-image */
   }
   .closing-block { max-width: none; }
   .closing-block .section-headline { font-size: 32px; }
-  .closing-image { flex: 0 1 747px; min-width: 400px; margin-left: -8px; }
+  /* No z-index of its own meant the 8px negative margin above put this on
+     top of the text column by plain DOM order — the opposite of "landing
+     it slightly under the text column's edge." z-index:0 (a positioned
+     ancestor isn't required; flex items get their own stacking context)
+     puts it behind .closing-text-col's z-index:1 instead, so the overlap
+     tucks under the text like the comment always intended. */
+  .closing-image { flex: 0 1 747px; min-width: 400px; margin-left: -8px; position: relative; z-index: 0; }
 
   /* ── Build-in — desktop only. The wrap's usual single whole-section fade
      (.reveal above) is neutralized here; .closing-composite carries that
