@@ -815,50 +815,22 @@ function loader() {
 }
 
 /* ============================================================================
-   5b. reviewReport — "Review your reports". Each report card has its own
-   Ready/Reviewed toggle (cosmetic — reviewing an individual card doesn't
-   gate Submit). Submit application only unlocks once the applicant checks
-   the confirmation row, and only this action actually sends anything to
-   the agent — navigates to applicationsList with value 'submitted' to show
-   the Submitted status + toast back on the applications list.
+   5b. reviewReport — "Review your reports" credit/background check summary.
+   Reuses .rs-card/.rs-row from review(). The reviewed checkbox is optional
+   per the refs (not required to submit). Submit navigates to
+   applicationsList with value 'submitted' to show the Submitted status +
+   toast back on the applications list.
    ============================================================================ */
-
-/* One simplified report card — no realistic credit/background/eviction
-   data, just enough to show a Ready -> Reviewed interaction. */
-function reportCard(title, desc) {
-  const pill = h('span', { class: 'rs-pill', text: 'Ready' });
-  const btn = h('button', { type: 'button', class: 'rs-outline-btn', text: 'Review report' });
-  let reviewed = false;
-  btn.addEventListener('click', () => {
-    reviewed = !reviewed;
-    pill.textContent = reviewed ? 'Reviewed' : 'Ready';
-    pill.classList.toggle('rs-pill--submitted', reviewed);
-    btn.textContent = reviewed ? 'Reviewed' : 'Review report';
-  });
-  return h('div', { class: 'rs-card' },
-    h('div', { class: 'rs-card-header' }, h('p', { class: 'rs-card-title', text: title }), pill),
-    h('p', { class: 'rs-card-desc', text: desc }),
-    btn
-  );
-}
 
 function reviewReport() {
   const reviewedMark = h('div', { class: 'rs-checkbox' }, Icon.check());
   const reviewedRow = h('div', { class: 'rs-checkbox-row', role: 'checkbox', 'aria-checked': 'false', tabindex: '0' },
     reviewedMark,
-    h('div', { class: 'rs-checkbox-copy' }, h('p', { class: 'rs-checkbox-title', text: "I confirm that I've reviewed my reports." }))
+    h('div', { class: 'rs-checkbox-copy' }, h('p', { class: 'rs-checkbox-title', text: "I've reviewed my reports" }))
   );
-
-  const submitBtn = h('button', { class: 'rs-btn-primary', text: 'Submit application', disabled: true });
-  submitBtn.addEventListener('click', () => {
-    if (submitBtn.disabled) return;
-    submitBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'applicationsList', value: 'submitted' } }));
-  });
-
   function toggleReviewed() {
     const checked = reviewedMark.classList.toggle('is-checked');
     reviewedRow.setAttribute('aria-checked', String(checked));
-    submitBtn.disabled = !checked;
   }
   reviewedRow.addEventListener('click', toggleReviewed);
   reviewedRow.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleReviewed(); } });
@@ -872,17 +844,49 @@ function reviewReport() {
     closeBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'back' } }));
   });
 
+  function readyPill() { return h('span', { class: 'rs-pill rs-pill--submitted', text: 'Ready' }); }
+  function cardHeader(title) {
+    return h('div', { class: 'rs-card-header' }, h('p', { class: 'rs-card-title', text: title }), readyPill());
+  }
+
   const scrollEl = h('div', { class: 'rs-scroll' },
     h('div', { class: 'rs-navbar' }, backBtn, h('span', { class: 'rs-navbar-title', text: '789 Birch Blvd, Unit 8' }), closeBtn),
     h('div', { class: 'rs-page-head' },
       h('h1', { class: 'rs-h1', text: 'Review your reports' }),
-      h('p', { class: 'rs-subtitle', text: 'Check your reports before sending your application to Jordan Blake.' })
+      h('p', { class: 'rs-subtitle', text: 'Check these over, then send them to Jordan to finish.' })
     ),
-    reportCard('Credit report', 'A summary of your credit history and open accounts.'),
-    reportCard('Background check', 'National and county criminal record search.'),
-    reportCard('Eviction history', 'Nationwide eviction filing search.'),
+    h('div', { class: 'rs-card' },
+      cardHeader('Credit report'),
+      h('div', { class: 'rs-row' }, h('span', { class: 'rs-row-label', text: 'TransUnion score' }), h('span', { class: 'rs-row-value rs-row-value--score', text: '742' })),
+      reviewRow('Tradelines', '5 active, 2 closed'),
+      reviewRow('Credit inquiries', '2'),
+      reviewRow('Collections', '0 open, 0 closed'),
+      reviewRow('Public records', '0'),
+      h('div', { class: 'rs-note-box' }, h('p', { text: 'No late payments across 7 accounts. Low utilization and a long, clean history.' })),
+      h('button', { type: 'button', class: 'rs-outline-btn', text: 'View full report' })
+    ),
+    h('div', { class: 'rs-card' },
+      cardHeader('Reference check'),
+      h('p', { class: 'rs-card-desc', text: 'Requests sent to the 2 references you gave us.' }),
+      h('button', { type: 'button', class: 'rs-outline-btn', text: 'View references' })
+    ),
+    h('div', { class: 'rs-card' },
+      cardHeader('Background check'),
+      h('p', { class: 'rs-card-desc', text: '1 record found. National, county, and sex-offender registries across 50 states.' }),
+      h('button', { type: 'button', class: 'rs-outline-btn', text: 'View report' })
+    ),
+    h('div', { class: 'rs-card' },
+      cardHeader('Eviction record'),
+      h('p', { class: 'rs-card-desc', text: '1 record found. Filings in the nationwide eviction database.' }),
+      h('button', { type: 'button', class: 'rs-outline-btn', text: 'View report' })
+    ),
     h('div', { class: 'rs-reviewed-row' }, reviewedRow)
   );
+
+  const submitBtn = h('button', { class: 'rs-btn-primary', text: 'Submit application' });
+  submitBtn.addEventListener('click', () => {
+    submitBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'applicationsList', value: 'submitted' } }));
+  });
 
   return h('div', { class: 'product' },
     statusBar(),

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Manrope:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Manrope:wght@400;500;600;700&display=swap');
 
 /* ============================================================================
    APPLICANTS — design tokens
@@ -54,6 +54,15 @@
   --duration-fast: 150ms;
   --duration-base: 200ms;
   --duration-slow: 250ms;
+
+  /* ── Reveal timing — scroll-triggered fade/rise speeds. Separate scale
+     from the UI-motion durations above (those are for hover/interaction,
+     150–250ms); reveals are content entering on scroll, so they run longer.
+     Medium is the default every .reveal section uses; fast is defined for
+     future use, not applied anywhere yet. */
+  --reveal-fast:   250ms;
+  --reveal-medium: 400ms;
+  --reveal-slow:   700ms;
 
   /* ── Radii — 8–20px band, same as lattice's chrome ───────────────────── */
   --radius-sm: 8px;
@@ -301,11 +310,11 @@ html {
 .reveal {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity .4s var(--ease-enter), transform .4s var(--ease-enter);
+  transition: opacity var(--reveal-medium) var(--ease-enter), transform var(--reveal-medium) var(--ease-enter);
 }
 .reveal.is-visible { opacity: 1; transform: translateY(0); }
 @media (prefers-reduced-motion: reduce) {
-  .reveal { opacity: 1; transform: none; transition: none; }
+  .reveal, .closing-block { opacity: 1; transform: none; transition: none; }
 }
 
 /* ── Sticky hairline bar — hidden while #hero is in view ─────────────────── */
@@ -411,14 +420,17 @@ html {
   line-height: 1.15;
   letter-spacing: -0.01em;
 }
-.section-body { font-family: var(--font-body); font-size: 16px; line-height: 1.6; color: var(--page-soft); max-width: 620px; margin: 0; }
+.section-body { font-family: var(--font-body); font-weight: 300; font-size: 16px; line-height: 1.6; color: var(--page-soft); max-width: 620px; margin: 0; }
 .section-body + .section-body { margin-top: 16px; }
 
-.split { display: grid; grid-template-columns: 1fr; gap: 48px; align-items: start; }
-@media (min-width: 1000px) { .split { grid-template-columns: 1fr 1fr; gap: 64px; } }
+/* ── Thesis intro — text + phone as one centered bundle, not a full-width
+   two-column split. Only usage of .split/.split-visual on the page. ────── */
+.split { display: flex; flex-direction: column; align-items: center; gap: 48px; }
+.split-text { max-width: 536px; }
 .split-visual { display: flex; justify-content: center; }
 @media (min-width: 1000px) {
-  .split-visual { justify-content: flex-start; align-items: flex-end; padding-top: 10vh; }
+  .split { flex-direction: row; justify-content: center; align-items: center; gap: 64px; }
+  .split-visual { justify-content: flex-start; }
 }
 
 .moment { padding: 40px 0; }
@@ -495,12 +507,20 @@ html {
   max-width: 680px; margin: 0;
 }
 
-/* ── Closing card ──────────────────────────────────────────────────────── */
-.closing-card {
-  background: var(--page-surface); border: 1px solid var(--page-rule); border-radius: var(--radius-lg);
-  padding: 32px; max-width: 620px;
+/* ── Pull moment — a large stated outcome with one highlighted clause, in
+   place of a plain boxed card. The eyebrow stays in the standard muted
+   .label register rather than --page-accent: accent stays reserved for the
+   highlighted clause below, the only piece here large enough to clear the
+   "never under 18px" accent-discipline floor (see the note up near
+   --page-accent's definition). */
+.pull-moment { max-width: 925px; }
+.pull-moment-eyebrow { margin: 0 0 16px; }
+.pull-moment-statement {
+  font-family: var(--font-heading); font-weight: 500;
+  font-size: clamp(22px, 3vw, 34px); line-height: 1.35;
+  color: var(--page-fg); margin: 0; text-wrap: balance;
 }
-.closing-card p { font-family: var(--font-body); font-size: 14px; line-height: 1.8; color: var(--page-soft); margin: 0; }
+.pull-moment-highlight { color: var(--page-accent); }
 
 /* ── Close — three text blocks scattered around the hand-with-phone photo,
    the only raster image on the page, reserved for this final beat. Widened
@@ -540,6 +560,26 @@ html {
   .closing-block--tl { left: 0; top: 2%; }
   .closing-block--tr { right: 0; left: auto; top: 44%; }
   .closing-block--bl { left: 0; top: 76%; }
+
+  /* ── Build-in — desktop only. The wrap's usual single whole-section fade
+     (.reveal above) is neutralized here; .closing-composite carries that
+     same reveal/is-visible wiring instead, purely as a trigger — it stays
+     visually inert itself, and each block fades in on its own delay once
+     it fires, so the three blocks arrive as a sequence rather than at once.
+     Below this breakpoint the composite just stacks, so the plain
+     whole-wrap fade from .reveal is left alone as-is. ────────────────── */
+  #close .wrap.reveal,
+  .closing-composite.reveal {
+    opacity: 1; transform: none; transition: none;
+  }
+  .closing-block {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity var(--reveal-slow) var(--ease-enter), transform var(--reveal-slow) var(--ease-enter);
+  }
+  .closing-composite.is-visible .closing-block--tl { opacity: 1; transform: none; }
+  .closing-composite.is-visible .closing-block--tr { opacity: 1; transform: none; transition-delay: .3s; }
+  .closing-composite.is-visible .closing-block--bl { opacity: 1; transform: none; transition-delay: .6s; }
 }
 
 /* ── Footer ────────────────────────────────────────────────────────────── */
