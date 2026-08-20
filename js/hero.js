@@ -105,15 +105,18 @@ function setupHero() {
 
   // Ambient idle pass: after 6s with no pointer movement, scramble one
   // random line every ~4s, so the hero stays alive while it's being
-  // talked over rather than presented.
+  // talked over rather than presented. Gated on hero visibility — no point
+  // (and no CPU) running this while the hero has scrolled out of view.
   let idleTimeout = null;
   let ambientInterval = null;
+  let heroVisible = true;
 
   function stopAmbient() {
     if (ambientInterval) { clearInterval(ambientInterval); ambientInterval = null; }
   }
   function startAmbient() {
     stopAmbient();
+    if (!heroVisible) return;
     ambientInterval = setInterval(() => {
       if (!allLines.length) return;
       const line = allLines[Math.floor(Math.random() * allLines.length)];
@@ -131,9 +134,20 @@ function setupHero() {
   document.addEventListener('touchstart', resetIdle, { passive: true });
   resetIdle();
 
+  const heroSection = titleEl.closest('section') || titleEl;
+  const heroVisibilityObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      heroVisible = entry.isIntersecting;
+      if (heroVisible) resetIdle();
+      else { stopAmbient(); clearTimeout(idleTimeout); }
+    });
+  }, { threshold: 0 });
+  heroVisibilityObserver.observe(heroSection);
+
   return function teardown() {
     clearTimeout(idleTimeout);
     stopAmbient();
+    heroVisibilityObserver.disconnect();
     document.removeEventListener('mousemove', resetIdle);
     document.removeEventListener('touchstart', resetIdle);
     listeners.forEach(({ el, type, handler }) => el.removeEventListener(type, handler));

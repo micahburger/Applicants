@@ -266,14 +266,19 @@ function overview(state) {
    ============================================================================ */
 
 function revealPanel(contentEl) {
-  const panel = h('div', { class: 'rs-reveal' }, h('div', { class: 'rs-reveal-inner' }, contentEl));
+  const panel = h('div', { class: 'rs-reveal', inert: true }, h('div', { class: 'rs-reveal-inner' }, contentEl));
+  let pendingRaf = null;
   function setOpen(open) {
+    if (pendingRaf) { cancelAnimationFrame(pendingRaf); pendingRaf = null; }
     if (open) {
       panel.classList.add('is-open');
       panel.style.maxHeight = panel.scrollHeight + 'px';
+      panel.removeAttribute('inert');
     } else {
       panel.style.maxHeight = panel.scrollHeight + 'px'; // lock current height before collapsing
-      requestAnimationFrame(() => {
+      panel.setAttribute('inert', ''); // pull fields out of tab order immediately, don't wait for the collapse to finish
+      pendingRaf = requestAnimationFrame(() => {
+        pendingRaf = null;
         panel.classList.remove('is-open');
         panel.style.maxHeight = '0px';
       });
@@ -631,7 +636,9 @@ function payment() {
     h('span', { class: 'rs-total-label', text: 'Total' }),
     h('span', { class: 'rs-total-amounts' }, totalValueEl, chevronWrap)
   );
+  let breakdownPendingRaf = null;
   totalRow.addEventListener('click', () => {
+    if (breakdownPendingRaf) { cancelAnimationFrame(breakdownPendingRaf); breakdownPendingRaf = null; }
     const open = !breakdown.classList.contains('is-open');
     chevronWrap.firstElementChild.classList.toggle('is-open', open);
     if (open) {
@@ -639,7 +646,8 @@ function payment() {
       breakdown.style.maxHeight = breakdown.scrollHeight + 'px';
     } else {
       breakdown.style.maxHeight = breakdown.scrollHeight + 'px';
-      requestAnimationFrame(() => {
+      breakdownPendingRaf = requestAnimationFrame(() => {
+        breakdownPendingRaf = null;
         breakdown.classList.remove('is-open');
         breakdown.style.maxHeight = '0px';
       });

@@ -494,6 +494,12 @@ html {
      stretches its own children, just the empty track space below them. */
   #review-layout {
     display: flex;
+    flex-wrap: wrap; /* natural widths sum to ~1300px — doesn't clear 1080's
+      content-max until a genuinely wide viewport. Wrapping (rather than
+      shrinking) keeps every piece at its true size down through 1100px;
+      it only costs the "stretch" row-height match between columns once
+      notes drops to its own line, which is a fair trade for never
+      squeezing the phone or scrolling the page sideways. */
     justify-content: center;
     align-items: stretch;
     gap: 28px;
@@ -598,12 +604,19 @@ html {
      justify-content:center pattern as .split above, rather than stretched
      to the wrap's full width. */
   .closing-composite { display: flex; flex-direction: row; justify-content: center; align-items: flex-start; gap: 0; }
+  /* Text (460) + photo (747) sum past 1080's content-max as soon as the
+     gutters come off a narrow-ish desktop — at 1100px there's only ~1000px
+     to work with, ~200px short. flex-shrink:0 on both used to just run the
+     row off the edges. Letting them shrink (default flex-shrink:1, weighted
+     by their basis) splits that deficit proportionally instead, so they
+     scale down together and settle back at their true 460/747 once the
+     viewport actually has room — no separate narrow-desktop layout needed. */
   .closing-text-col {
-    align-items: flex-start; gap: 64px; max-width: 460px; flex-shrink: 0;
+    align-items: flex-start; gap: 64px; flex: 0 1 460px; min-width: 300px;
   }
   .closing-block { max-width: none; }
   .closing-block .section-headline { font-size: 32px; }
-  .closing-image { width: 747px; flex-shrink: 0; margin-left: -8px; }
+  .closing-image { flex: 0 1 747px; min-width: 400px; margin-left: -8px; }
 
   /* ── Build-in — desktop only. The wrap's usual single whole-section fade
      (.reveal above) is neutralized here; .closing-composite carries that

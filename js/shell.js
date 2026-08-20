@@ -138,8 +138,11 @@ function wireKeyboardNav() {
     const tag = (e.target.tagName || '').toLowerCase();
     if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
+    // A live phone owns the keyboard — arrow keys/spacebar scroll its own
+    // screen and number keys are just card content, not section jumps.
+    if (document.querySelector('.phone-frame.is-live')) return;
 
-    if (e.key >= '1' && e.key <= '8') { jumpTo(Number(e.key) - 1); return; }
+    if (e.key >= '1' && Number(e.key) <= SECTIONS.length) { jumpTo(Number(e.key) - 1); return; }
 
     switch (e.key) {
       case 'ArrowDown': case 'ArrowRight': case ' ':

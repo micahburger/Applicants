@@ -164,7 +164,12 @@
 
 .rs-edit-btn {
   border: 1px solid rgba(26, 26, 24, 0.16); background: transparent; border-radius: 999px;
-  padding: 6px 14px; font-family: var(--rs-font-body); font-size: 12px; font-weight: 600; color: var(--rs-ink);
+  /* Fixed height, matching .rs-step-badge's 26px circle exactly — padding
+     plus this font's line-height alone rendered ~31px, 5px taller than the
+     badge, which pushed every row below it down whenever a row picked up
+     an Edit button (i.e. on every overview fresh/resumed toggle). */
+  height: 26px; padding: 0 14px; display: inline-flex; align-items: center;
+  font-family: var(--rs-font-body); font-size: 12px; font-weight: 600; color: var(--rs-ink);
   transition: background-color .15s ease, border-color .15s ease, transform .1s ease;
 }
 .rs-edit-btn:hover { background: rgba(26, 26, 24, 0.05); border-color: rgba(26, 26, 24, 0.28); }

@@ -62,7 +62,12 @@ function buildPhone(mountEl) {
   function mountScreen(value, nameOverride) {
     const fn = nameOverride ? phoneScreenFn(nameOverride) : screenFn;
     const node = value !== undefined ? fn(value) : fn();
-    node.style.pointerEvents = frame.classList.contains('is-live') ? 'auto' : 'none';
+    const live = frame.classList.contains('is-live');
+    node.style.pointerEvents = live ? 'auto' : 'none';
+    // pointer-events:none alone still leaves every field/button inside
+    // reachable by Tab — inert pulls the whole inactive screen out of
+    // keyboard focus order too, matching what a sighted user sees.
+    node.toggleAttribute('inert', !live);
     screenSlot.innerHTML = '';
     screenSlot.appendChild(node);
     return node;
@@ -102,7 +107,10 @@ function buildPhone(mountEl) {
   function setLive(live) {
     frame.classList.toggle('is-live', live);
     const productEl = screenWrap.querySelector('.product');
-    if (productEl) productEl.style.pointerEvents = live ? 'auto' : 'none';
+    if (productEl) {
+      productEl.style.pointerEvents = live ? 'auto' : 'none';
+      productEl.toggleAttribute('inert', !live);
+    }
   }
 
   function activate() { setLive(true); }
@@ -112,11 +120,18 @@ function buildPhone(mountEl) {
 
   document.addEventListener('click', e => {
     if (!frame.classList.contains('is-live')) return;
-    if (frame.contains(e.target)) return;
+    // figure, not frame — Reset and the state segmented control sit in
+    // .phone-controls, outside the device bezel. Scoping this to frame
+    // meant clicking either one bubbled to this same-phone "click outside"
+    // check and deactivated the phone it had just acted on.
+    if (figure.contains(e.target)) return;
     deactivate();
   });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && frame.classList.contains('is-live')) deactivate();
+    if (e.key === 'Escape' && frame.classList.contains('is-live')) {
+      deactivate();
+      overlay.focus();
+    }
   });
 
   screenWrap.appendChild(overlay);
