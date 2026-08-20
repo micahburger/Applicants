@@ -1,9 +1,7 @@
 /* ============================================================================
-   APPLICANTS — arc-3's phone stays put; the annotation panel is a static
-   reference covering all four states (payment -> loader -> reviewReport ->
-   applicationsList) side by side, so it reads the same regardless of where
-   the phone currently is. Only the one-time interaction caption reacts to
-   navigation, hiding itself once the visitor has driven the phone once.
+   APPLICANTS — arc-3's phone. The one-time interaction caption reacts to
+   navigation, hiding itself once the visitor has driven the phone once, and
+   reappearing on Reset.
    ============================================================================ */
 
 function initPaymentFlow() {

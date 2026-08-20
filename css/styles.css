@@ -234,6 +234,17 @@ section {
    this section so the three tracks aren't cramped. */
 #arc-2 .wrap { max-width: 1407px; }
 
+/* Thesis breaks out of the centered reading column on desktop — the collage's
+   bleed only reads as "full width" if the section actually is, hugging the
+   left edge instead of sitting in a centered 1080px box with dead space on
+   both sides. Right edge keeps the normal gutter so the bled screens still
+   have a soft landing rather than touching the viewport edge. Desktop-only:
+   below 1000px .split stacks to a single column and the standard centered
+   wrap reads better than a 30px-narrow left margin. */
+@media (min-width: 1000px) {
+  #thesis .wrap { max-width: none; padding-left: 30px; padding-right: var(--gutter); }
+}
+
 /* ── Device frame / bezel ─────────────────────────────────────────────────
    Bezel goes lighter than the page, not darker: a black bezel would merge
    into --page-bg and the phone would read as a floating rectangle instead of
@@ -426,11 +437,42 @@ html {
 /* ── Thesis intro — text + phone as one centered bundle, not a full-width
    two-column split. Only usage of .split/.split-visual on the page. ────── */
 .split { display: flex; flex-direction: column; align-items: center; gap: 48px; }
-.split-text { max-width: 536px; }
+.split-text { max-width: 500px; }
 .split-visual { display: flex; justify-content: center; }
 @media (min-width: 1000px) {
-  .split { flex-direction: row; justify-content: center; align-items: center; gap: 64px; }
+  .split { flex-direction: row; justify-content: flex-end; align-items: center; gap: 64px; }
   .split-visual { justify-content: flex-start; }
+}
+
+/* ── Thesis collage — flat PNG composite, not a live still-mount, all three
+   full screens at the same width with no clipping. Applications sits left,
+   in flow; the other two stack to its right at the same scale, taken clean
+   out of flow (position:absolute) and centered on the row, so their combined
+   height — taller than one screen — spills past the row's own box into the
+   hero/diagnosis whitespace above and below rather than being cropped to fit
+   it. z-index keeps that overflow paint on top of the neighboring sections
+   it bleeds into. PNGs are pre-masked to the phone's rounded silhouette on a
+   transparent ground, so drop-shadow (not box-shadow) reads as "lifted". ── */
+.collage-figure { display: flex; flex-direction: column; align-items: center; gap: 16px; min-width: 0; }
+.thesis-collage {
+  --collage-w: 520px;
+  --collage-fit: min(1, calc((100vw - 2 * var(--gutter)) / var(--collage-w)));
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  width: var(--collage-w);
+  zoom: var(--collage-fit);
+}
+.thesis-collage img { display: block; width: 250px; flex-shrink: 0; filter: drop-shadow(var(--shadow-lg)); }
+.collage-stack {
+  position: absolute;
+  left: 270px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .moment { padding: 40px 0; }
@@ -476,16 +518,6 @@ html {
 .notes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; max-width: 360px; }
 .notes li { display: flex; gap: 14px; font-family: var(--font-body); font-size: 13px; line-height: 1.75; color: var(--page-soft); }
 .notes .n { font-family: var(--font-label); font-size: 12px; color: var(--page-muted); flex-shrink: 0; width: 16px; padding-top: 1px; }
-
-/* ── Arc three's annotation panel — one phone, changing copy. Only one
-   .notes block is unhidden at a time; js/payment-flow.js crossfades between
-   them as the phone advances through the payment sequence. ─────────────── */
-.annotate-panel { position: relative; }
-.notes-group + .notes-group { border-top: 1px solid var(--page-rule); margin-top: 24px; padding-top: 24px; }
-.notes-title {
-  font-family: var(--font-label); font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--page-muted); margin: 0 0 16px;
-}
 
 /* ── Diagnosis — the one earned numbered list ─────────────────────────── */
 .diagnosis-list { max-width: 720px; }
@@ -547,7 +579,7 @@ html {
 
 .closing-image {
   width: min(100%, 747px);
-  aspect-ratio: 1178 / 1335;
+  aspect-ratio: 1110 / 1417;
   background-image: url('../img/closing.jpg');
   background-size: cover;
   background-position: center;
