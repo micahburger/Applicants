@@ -484,11 +484,14 @@ html {
 .collage-front, .collage-stack img {
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity var(--reveal-slow) var(--ease-enter), transform var(--reveal-slow) var(--ease-enter);
+  /* 2x --reveal-slow (700ms -> 1400ms), scoped here rather than doubling
+     the shared token itself — --reveal-slow drives other reveals on the
+     page that weren't asked to slow down. */
+  transition: opacity 1.4s var(--ease-enter), transform 1.4s var(--ease-enter);
 }
 .wrap.reveal.is-visible .collage-front { opacity: 1; transform: none; }
-.wrap.reveal.is-visible .collage-stack img:nth-child(1) { opacity: 1; transform: none; transition-delay: .2s; }
-.wrap.reveal.is-visible .collage-stack img:nth-child(2) { opacity: 1; transform: none; transition-delay: .4s; }
+.wrap.reveal.is-visible .collage-stack img:nth-child(1) { opacity: 1; transform: none; transition-delay: .4s; }
+.wrap.reveal.is-visible .collage-stack img:nth-child(2) { opacity: 1; transform: none; transition-delay: .8s; }
 
 .moment { padding: 40px 0; }
 .moment:first-of-type { padding-top: 0; }
