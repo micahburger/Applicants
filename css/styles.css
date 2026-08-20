@@ -232,7 +232,7 @@ section {
 /* Arc two's 3-up split (text | phone | notes) needs more breathing room than
    the 1080px reading column gives a single block of prose — widened just for
    this section so the three tracks aren't cramped. */
-#arc-2 .wrap { max-width: 1320px; }
+#arc-2 .wrap { max-width: 1407px; }
 
 /* ── Device frame / bezel ─────────────────────────────────────────────────
    Bezel goes lighter than the page, not darker: a black bezel would merge
@@ -442,17 +442,27 @@ html {
 .moment-layout { display: grid; grid-template-columns: 1fr; gap: 40px; align-items: start; }
 @media (min-width: 1000px) { .moment-layout { grid-template-columns: auto 1fr; gap: 64px; } }
 @media (min-width: 1000px) {
-  /* Arc two's review moment is a 3-up split: text | phone | notes, all
-     vertically aligned to the same row. align-items:stretch lets the text
-     column (a space-between flex column) reach the row's full height so its
+  /* Arc two's review moment is a centered 3-up bundle — text | phone |
+     notes — not a grid stretched to fill the wrap. justify-content:center
+     centers the whole group in the browser the same way .split does for
+     the thesis intro; align-items:stretch (flex's default, made explicit
+     here) lets the text column reach the row's full height so its
      follow-up paragraph sits low, near the phone/notes' natural bottom —
      phone-figure and notes stay visually top-anchored since neither of them
      stretches its own children, just the empty track space below them. */
   #review-layout {
-    grid-template-columns: minmax(280px, 1.4fr) 300px minmax(200px, 1fr);
-    gap: 48px;
+    display: flex;
+    justify-content: center;
     align-items: stretch;
+    gap: 28px;
   }
+  /* Flexbox's default shrink was squeezing the phone (no intrinsic
+     min-width of its own to resist with) down to ~343px instead of its
+     true ~414px zoomed size, even with room to spare elsewhere — pin all
+     three to their natural sizes so the row's real width is just their sum,
+     centered as-is rather than fought over. */
+  #review-layout > * { flex-shrink: 0; }
+  .moment-text { max-width: 480px; }
 }
 .moment-hairline { border-top: 1px solid var(--page-rule); margin: 8px 0 0; }
 .moment-text { display: flex; flex-direction: column; justify-content: space-between; gap: 32px; }
@@ -513,7 +523,7 @@ html {
    highlighted clause below, the only piece here large enough to clear the
    "never under 18px" accent-discipline floor (see the note up near
    --page-accent's definition). */
-.pull-moment { max-width: 925px; }
+.pull-moment { max-width: 925px; margin: 0 auto; }
 .pull-moment-eyebrow { margin: 0 0 16px; }
 .pull-moment-statement {
   font-family: var(--font-heading); font-weight: 500;
@@ -522,15 +532,16 @@ html {
 }
 .pull-moment-highlight { color: var(--page-accent); }
 
-/* ── Close — three text blocks scattered around the hand-with-phone photo,
-   the only raster image on the page, reserved for this final beat. Widened
-   past the standard reading column since three blocks + a tall photo need
-   more room than a single column of prose. Below 1100px the composition
-   doesn't hold up at any reasonable size, so it just stacks in document
-   order — photo in the middle, full width, no absolute positioning. ────── */
+/* ── Close — left-aligned text column with the hand-with-phone photo
+   overlapping on the right, the only raster image on the page, reserved
+   for this final beat. Widened past the standard reading column since the
+   text column + a wide photo need more room than a single reading column.
+   Below 1100px the composition doesn't hold up at any reasonable size, so
+   it just stacks in document order — text column, then photo. ─────────── */
 #close .wrap { max-width: 1482px; }
 
 .closing-composite { display: flex; flex-direction: column; align-items: center; gap: 48px; }
+.closing-text-col { display: flex; flex-direction: column; align-items: center; gap: 48px; }
 .closing-block { max-width: 480px; }
 .closing-block .section-headline { max-width: none; }
 
@@ -548,25 +559,26 @@ html {
 }
 
 @media (min-width: 1100px) {
-  .closing-composite { position: relative; display: block; min-height: 1200px; }
-  .closing-image {
-    /* Lowest layer of the group — the text blocks sit on top of it and are
-       meant to overlap its edges, not sit beside it. */
-    position: absolute; left: 50%; top: 0; z-index: 0;
-    width: 747px;
-    transform: translateX(-50%);
+  /* Text column (460) + photo (747), pulled 30px closer than the initial
+     22px gap — gap can't go negative in CSS, so the photo instead carries
+     an 8px negative margin, landing it slightly under the text column's
+     edge. Centered as that tight pair within the wider 1482px wrap, same
+     justify-content:center pattern as .split above, rather than stretched
+     to the wrap's full width. */
+  .closing-composite { display: flex; flex-direction: row; justify-content: center; align-items: flex-start; gap: 0; }
+  .closing-text-col {
+    align-items: flex-start; gap: 64px; max-width: 460px; flex-shrink: 0;
   }
-  .closing-block { position: absolute; z-index: 1; max-width: 420px; }
-  .closing-block--tl { left: 0; top: 2%; }
-  .closing-block--tr { right: 0; left: auto; top: 44%; }
-  .closing-block--bl { left: 0; top: 76%; }
+  .closing-block { max-width: none; }
+  .closing-block .section-headline { font-size: 32px; }
+  .closing-image { width: 747px; flex-shrink: 0; margin-left: -8px; }
 
   /* ── Build-in — desktop only. The wrap's usual single whole-section fade
      (.reveal above) is neutralized here; .closing-composite carries that
      same reveal/is-visible wiring instead, purely as a trigger — it stays
      visually inert itself, and each block fades in on its own delay once
      it fires, so the three blocks arrive as a sequence rather than at once.
-     Below this breakpoint the composite just stacks, so the plain
+     Below this breakpoint the composition doesn't hold, so the plain
      whole-wrap fade from .reveal is left alone as-is. ────────────────── */
   #close .wrap.reveal,
   .closing-composite.reveal {
@@ -577,9 +589,9 @@ html {
     transform: translateY(20px);
     transition: opacity var(--reveal-slow) var(--ease-enter), transform var(--reveal-slow) var(--ease-enter);
   }
-  .closing-composite.is-visible .closing-block--tl { opacity: 1; transform: none; }
-  .closing-composite.is-visible .closing-block--tr { opacity: 1; transform: none; transition-delay: .3s; }
-  .closing-composite.is-visible .closing-block--bl { opacity: 1; transform: none; transition-delay: .6s; }
+  .closing-composite.is-visible .closing-text-col .closing-block:nth-child(1) { opacity: 1; transform: none; }
+  .closing-composite.is-visible .closing-text-col .closing-block:nth-child(2) { opacity: 1; transform: none; transition-delay: .3s; }
+  .closing-composite.is-visible .closing-text-col .closing-block:nth-child(3) { opacity: 1; transform: none; transition-delay: .6s; }
 }
 
 /* ── Footer ────────────────────────────────────────────────────────────── */

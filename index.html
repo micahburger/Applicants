@@ -40,7 +40,7 @@
       <div class="split">
         <div class="split-text">
           <p class="label eyebrow">Business impact</p>
-          <h2 class="display section-headline">Most of the business runs through the application.</h2>
+          <h2 class="display section-headline">Most of the business runs through applications.</h2>
           <p class="section-body">RentSpree has other revenue streams, including agent subscriptions and landlord services. But applications carry most of the transactions and most of the revenue. Improving completion here has a direct effect on the business.</p>
           <p class="section-body">The redesign focused on helping more applicants finish and improving the information agents receive. It also created a path from the first application payment to deposits and rent after approval.</p>
         </div>
@@ -56,7 +56,7 @@
   <section id="diagnosis">
     <div class="wrap reveal">
       <p class="label eyebrow">The problem</p>
-      <h2 class="display section-headline">Where the application broke down.</h2>
+      <h2 class="display section-headline">Where applications break down.</h2>
       <div class="diagnosis-list">
         <div class="diagnosis-item">
           <span class="num">01</span>
@@ -145,7 +145,7 @@
               <p class="section-body moment-followup">Once the mistake appeared in a report, the report had already been pulled. Field validation wouldn't catch every error, so applicants needed a full review before anything was sent to the bureau.</p>
             </div>
           </div>
-          <div class="phone-mount" data-screen="review" data-size="sm"></div>
+          <div class="phone-mount" data-screen="review"></div>
           <ol class="notes">
             <li><span class="n">01</span><span>Every section can be edited directly from the review page. Applicants can correct an answer while they still have control over it.</span></li>
             <li><span class="n">02</span><span>"Check everything before it goes to Jordan. You can still edit." The description names the person and the deadline in one line.</span></li>
@@ -209,29 +209,30 @@
     </div>
   </section>
 
-  <!-- ═══ 7 · CLOSE — three text blocks scattered around the closing photo,
-       all one composite group. Desktop-only positioning; see .closing-block
-       in styles.css for why mobile just stacks in document order instead. -->
+  <!-- ═══ 7 · CLOSE — text column left-aligned, closing photo overlapping on
+       the right, all one composite group. Desktop-only positioning; see
+       .closing-block in styles.css for why mobile just stacks instead. -->
   <section id="close">
     <div class="wrap reveal">
       <div class="closing-composite reveal">
-        <div class="closing-block closing-block--tl">
-          <h2 class="display section-headline">Making abandonment measurable</h2>
-          <p class="section-body">To improve completion, we needed to know exactly where applicants were leaving. I worked with engineering to add tracking across the new flow so we could see which sections were causing problems and what changed after each release.</p>
+        <div class="closing-text-col">
+          <div class="closing-block">
+            <h2 class="display section-headline">Making abandonment measurable</h2>
+            <p class="section-body">To improve completion, we needed to know exactly where applicants were leaving. I worked with engineering to add tracking across the new flow so we could see which sections were causing problems and what changed after each release.</p>
+          </div>
+
+          <div class="closing-block">
+            <h2 class="display section-headline">An AI-empowered workflow to design and build</h2>
+            <p class="section-body">Using Claude Code and our design system, I built the application as a working prototype instead of a series of static screens. That let me focus on the UX, content, structure, and workflow while design, product, and engineering reviewed the complete experience together.</p>
+          </div>
+
+          <div class="closing-block">
+            <h2 class="display section-headline">From applicant to tenant</h2>
+            <p class="section-body">Clearer reports help agents and landlords screen with more confidence. Once someone is accepted, a saved payment method makes it easier to move into deposits and rent, beginning the landlord-tenant relationship.</p>
+          </div>
         </div>
 
         <div class="closing-image" aria-hidden="true"></div>
-
-        <div class="closing-block closing-block--tr">
-          <h2 class="display section-headline">An AI-empowered workflow to design and build</h2>
-          <p class="section-body">Using Claude Code, I built the prototype with buttons, form controls, and patterns from our design system. I worked closely with the design team to keep those components consistent while I focused on the UX, information architecture, content, and overall application workflow.</p>
-          <p class="section-body">Because the prototype worked like the product, I could move entire sections, test different sequences, and review decisions with design, product, and engineering in one connected experience.</p>
-        </div>
-
-        <div class="closing-block closing-block--bl">
-          <h2 class="display section-headline">From applicant to tenant</h2>
-          <p class="section-body">Clearer reports help agents and landlords screen with more confidence. Once someone is accepted, a saved payment method makes it easier to move into deposits and rent, beginning the landlord-tenant relationship.</p>
-        </div>
       </div>
     </div>
   </section>
