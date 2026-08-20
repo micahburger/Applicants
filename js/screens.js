@@ -241,11 +241,11 @@ function overview(state) {
         h('p', { class: 'rs-subtitle', text: 'Austin, TX 73301', style: 'margin-bottom:20px;' })
       ),
       h('div', { class: 'rs-card rs-agent-card' },
-        h('div', { class: 'rs-avatar', text: 'JB' }),
+        h('div', { class: 'rs-avatar' }, h('img', { src: 'img/agent/sarah-black.png', alt: '' })),
         h('div', { class: 'rs-agent-meta' },
           h('p', { class: 'rs-agent-label', text: 'Application goes to' }),
-          h('p', { class: 'rs-agent-name', text: 'Jordan Blake' }),
-          h('p', { class: 'rs-agent-email', text: 'jordan.blake@rentspree.com' })
+          h('p', { class: 'rs-agent-name', text: 'Sarah Black' }),
+          h('p', { class: 'rs-agent-email', text: 'sarah.black@rentspree.com' })
         )
       ),
       h('div', { class: 'rs-section-head' },
@@ -521,7 +521,7 @@ function review() {
       stepHeader({ title: '789 Birch Blvd, Unit 8', step: 1, total: 2 }),
       h('div', { class: 'rs-page-head' },
         h('h1', { class: 'rs-h1', text: 'Review your application' }),
-        h('p', { class: 'rs-subtitle', text: 'Check everything before it goes to Jordan. You can still edit.' })
+        h('p', { class: 'rs-subtitle', text: 'Check everything before it goes to Sarah. You can still edit.' })
       ),
       h('div', { class: 'rs-card' },
         h('div', { class: 'rs-card-header' },
@@ -891,7 +891,7 @@ function reviewReport() {
     h('div', { class: 'rs-navbar' }, backBtn, h('span', { class: 'rs-navbar-title', text: '789 Birch Blvd, Unit 8' }), closeBtn),
     h('div', { class: 'rs-page-head' },
       h('h1', { class: 'rs-h1', text: 'Review your reports' }),
-      h('p', { class: 'rs-subtitle', text: 'Check these over, then send them to Jordan to finish.' })
+      h('p', { class: 'rs-subtitle', text: 'Check these over, then send them to Sarah to finish.' })
     ),
     h('div', { class: 'rs-card' },
       cardHeader('Credit report'),
