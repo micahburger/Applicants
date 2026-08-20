@@ -84,6 +84,32 @@ function wireReveal() {
   targets.forEach(t => observer.observe(t));
 }
 
+/* ── V1 sheet — full-screen takeover of the original RentSpree screens,
+   reached from the last item in the pill's expanded jump list. ─────────── */
+function openV1Sheet() {
+  const sheet = document.getElementById('v1-sheet');
+  if (!sheet) return;
+  sheet.removeAttribute('inert');
+  sheet.classList.add('is-open');
+  document.body.style.overflow = 'hidden';
+  const closeBtn = document.getElementById('v1-sheet-close');
+  if (closeBtn) closeBtn.focus();
+}
+function closeV1Sheet() {
+  const sheet = document.getElementById('v1-sheet');
+  if (!sheet || !sheet.classList.contains('is-open')) return;
+  sheet.classList.remove('is-open');
+  sheet.setAttribute('inert', '');
+  document.body.style.overflow = '';
+}
+function wireV1Sheet() {
+  const closeBtn = document.getElementById('v1-sheet-close');
+  if (closeBtn) closeBtn.addEventListener('click', closeV1Sheet);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeV1Sheet();
+  });
+}
+
 /* ── Pill nav — collapsed pill / plain jump list ─────────────────────────── */
 function wirePillNav() {
   const pill = document.querySelector('.section-pill');
@@ -116,6 +142,12 @@ function wirePillNav() {
       btn.addEventListener('click', () => { jumpTo(i); closeList(); });
       listEl.appendChild(btn);
     });
+    const v1Btn = document.createElement('button');
+    v1Btn.type = 'button';
+    v1Btn.className = 'v1-trigger';
+    v1Btn.textContent = 'Application experience V1';
+    v1Btn.addEventListener('click', () => { closeList(); openV1Sheet(); });
+    listEl.appendChild(v1Btn);
     root.appendChild(listEl);
   }
 
@@ -141,6 +173,10 @@ function wireKeyboardNav() {
     // A live phone owns the keyboard — arrow keys/spacebar scroll its own
     // screen and number keys are just card content, not section jumps.
     if (document.querySelector('.phone-frame.is-live')) return;
+    // Same story for the V1 sheet — it scrolls its own content over the
+    // page, section jumps underneath it would be invisible and confusing.
+    const v1Sheet = document.getElementById('v1-sheet');
+    if (v1Sheet && v1Sheet.classList.contains('is-open')) return;
 
     if (e.key >= '1' && Number(e.key) <= SECTIONS.length) { jumpTo(Number(e.key) - 1); return; }
 
@@ -163,6 +199,7 @@ function initShell() {
   wireReveal();
   wirePillNav();
   wireKeyboardNav();
+  wireV1Sheet();
 }
 
 document.addEventListener('DOMContentLoaded', initShell);

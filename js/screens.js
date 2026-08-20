@@ -162,7 +162,7 @@ function applicationsList(highlight) {
     const closeBtn = h('button', { type: 'button', class: 'rs-toast-close', 'aria-label': 'Dismiss' }, Icon.close());
     const toast = h('div', { class: 'rs-toast' },
       h('span', { class: 'rs-toast-icon' }, Icon.info()),
-      h('span', { class: 'rs-toast-text', text: 'Application submitted for 789 Birch Blvd, Unit 8.' }),
+      h('span', { class: 'rs-toast-text', text: 'Application submitted.' }),
       closeBtn
     );
     root.appendChild(h('div', { class: 'rs-toast-wrap' }, toast));
@@ -229,7 +229,7 @@ function overview(state) {
     primaryBtn.dispatchEvent(new CustomEvent('rs-navigate', { bubbles: true, detail: { to: 'yourDetails' } }));
   });
 
-  return h('div', { class: 'product' },
+  const root = h('div', { class: 'product' },
     statusBar(),
     h('div', { class: 'rs-scroll' },
       h('div', { class: 'rs-navbar' },
@@ -258,6 +258,26 @@ function overview(state) {
     ),
     h('div', { class: 'rs-bottom-bar' }, primaryBtn)
   );
+
+  // Landing here via yourDetails' Continue (not the state segmented
+  // control — that only ever passes 'fresh'/'resumed') is the one moment
+  // a step just flipped to done while the visitor was watching, so it
+  // gets the same slide-down toast treatment as applicationsList's
+  // submitted confirmation, reused verbatim rather than a new pattern.
+  if (state === 'resumed-about-you-done') {
+    const toast = h('div', { class: 'rs-toast' },
+      h('span', { class: 'rs-toast-icon' }, Icon.check()),
+      h('span', { class: 'rs-toast-text', text: 'About you complete' })
+    );
+    root.appendChild(h('div', { class: 'rs-toast-wrap' }, toast));
+    requestAnimationFrame(() => toast.classList.add('is-visible'));
+    setTimeout(() => {
+      toast.classList.remove('is-visible');
+      setTimeout(() => { if (toast.parentElement) toast.parentElement.remove(); }, 300);
+    }, 2600);
+  }
+
+  return root;
 }
 
 /* ============================================================================

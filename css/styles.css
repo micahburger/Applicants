@@ -325,7 +325,7 @@ html {
 }
 .reveal.is-visible { opacity: 1; transform: translateY(0); }
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .closing-block { opacity: 1; transform: none; transition: none; }
+  .reveal, .closing-block, .collage-front, .collage-stack img { opacity: 1; transform: none; transition: none; }
 }
 
 /* ── Sticky hairline bar — hidden while #hero is in view ─────────────────── */
@@ -475,6 +475,21 @@ html {
   gap: 20px;
 }
 
+/* Build-in — the three screens arrive one at a time (applications list,
+   then the tenant/cosigner role screen, then the overview) instead of
+   fading up as one flat group, so the opening moment reads as an intro
+   rather than just another reveal. Piggybacks on the section's own
+   .wrap.reveal trigger — no separate observer needed, just a longer,
+   staggered version of the same fade+rise every .reveal already does. */
+.collage-front, .collage-stack img {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity var(--reveal-slow) var(--ease-enter), transform var(--reveal-slow) var(--ease-enter);
+}
+.wrap.reveal.is-visible .collage-front { opacity: 1; transform: none; }
+.wrap.reveal.is-visible .collage-stack img:nth-child(1) { opacity: 1; transform: none; transition-delay: .2s; }
+.wrap.reveal.is-visible .collage-stack img:nth-child(2) { opacity: 1; transform: none; transition-delay: .4s; }
+
 .moment { padding: 40px 0; }
 .moment:first-of-type { padding-top: 0; }
 .moment-heading {
@@ -494,30 +509,38 @@ html {
      stretches its own children, just the empty track space below them. */
   #review-layout {
     display: flex;
-    flex-wrap: wrap; /* natural widths sum to ~1300px — doesn't clear 1080's
-      content-max until a genuinely wide viewport. Wrapping (rather than
-      shrinking) keeps every piece at its true size down through 1100px;
-      it only costs the "stretch" row-height match between columns once
-      notes drops to its own line, which is a fair trade for never
-      squeezing the phone or scrolling the page sideways. */
     justify-content: center;
     align-items: stretch;
     gap: 28px;
   }
+  /* Natural widths (480 + 416 + 360 + gaps ≈ 1312px) don't clear 1080's
+     content-max until a genuinely wide viewport. flex-wrap used to be the
+     fix here, but wrapping dropped notes onto its own line below the
+     phone instead of keeping the 3-up row intact — wrong result, notes
+     belongs beside the phone. The phone has no give of its own (see next
+     rule), so text and notes are the two that flex, splitting the deficit
+     between them and settling back at their true 480/360 once the
+     viewport actually has room — same shrink-not-wrap approach as the
+     closing section's photo/text pair. */
+  .moment-text { flex: 0 1 480px; min-width: 280px; }
+  .notes { flex: 0 1 360px; min-width: 220px; }
   /* Flexbox's default shrink was squeezing the phone (no intrinsic
      min-width of its own to resist with) down to ~343px instead of its
-     true ~414px zoomed size, even with room to spare elsewhere — pin all
-     three to their natural sizes so the row's real width is just their sum,
-     centered as-is rather than fought over. */
-  #review-layout > * { flex-shrink: 0; }
-  .moment-text { max-width: 480px; }
+     true ~414px zoomed size, even with room to spare elsewhere — pin it
+     to its natural size so it never gives up width to the other two. */
+  #review-layout > .phone-figure { flex-shrink: 0; }
 }
 .moment-hairline { border-top: 1px solid var(--page-rule); margin: 8px 0 0; }
 .moment-text { display: flex; flex-direction: column; justify-content: space-between; gap: 32px; }
 .moment-followup { margin-top: 20px; }
 
 .moment-title {
-  font-family: var(--font-heading); font-weight: 600; font-size: clamp(20px, 2.4vw, 28px);
+  /* Matches .section-headline's actual rendered size — its own font-size
+     (38px, fixed) sits later in this file than .display's responsive
+     clamp() and wins the cascade on every "display section-headline"
+     heading, so 38px fixed is genuinely what "the other headlines" are,
+     not --size-display. */
+  font-family: var(--font-heading); font-weight: 600; font-size: 38px;
   line-height: 1.15; color: var(--page-fg); margin: 0 0 16px; text-wrap: balance;
 }
 
@@ -742,3 +765,47 @@ html {
 }
 .phone-states button.active { background: var(--page-fg); color: var(--page-bg); }
 .phone-states button:focus-visible { outline: 2px solid var(--page-accent); outline-offset: 2px; }
+
+/* ── V1 sheet — full-screen takeover reached from the pill's expanded jump
+   list, showing the original RentSpree screens behind this redesign.
+   Portfolio chrome throughout, so --page-* only, same as the rest of this
+   file's rule (see the top of this file for why). ─────────────────────── */
+.v1-sheet {
+  position: fixed; inset: 0; z-index: 200;
+  background: var(--page-bg);
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform var(--reveal-slow) var(--ease-enter);
+}
+.v1-sheet.is-open { transform: translateY(0); }
+.v1-sheet-inner {
+  max-width: 1100px; margin: 0 auto;
+  padding: calc(64px + env(safe-area-inset-top, 0px)) var(--gutter) 80px;
+}
+.v1-sheet-title {
+  font-family: var(--font-heading); font-weight: 600; color: var(--page-fg);
+  font-size: clamp(28px, 4vw, 44px); line-height: 1.08; margin: 0 0 40px;
+}
+.v1-sheet-image {
+  display: block; width: 100%; height: auto; border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+.v1-sheet-close {
+  position: fixed; top: var(--gutter); right: var(--gutter); z-index: 210;
+  width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer;
+  background: var(--page-fg); color: var(--page-bg);
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity .15s ease, transform .1s ease;
+}
+.v1-sheet-close:hover { opacity: .85; }
+.v1-sheet-close:active { transform: scale(.94); }
+.v1-sheet-close:focus-visible { outline: 2px solid var(--page-accent); outline-offset: 3px; }
+
+/* Trigger — last item in the pill's expanded jump list, set apart from
+   the section buttons above it with a rule rather than folded in as if
+   it were section 08. */
+.section-jumplist .v1-trigger {
+  border-top: 1px solid var(--page-rule); margin-top: 4px; padding-top: 14px;
+  color: var(--page-soft);
+}
+.section-jumplist .v1-trigger:hover { color: var(--page-fg); }
