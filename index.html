@@ -6,8 +6,8 @@
 <title>Rental application redesign</title>
 <meta name="description" content="A case study on redesigning the RentSpree rental application, from the first form field through payment and final submission." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23161516'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%239C8B70'/%3E%3C/svg%3E" />
-<link rel="stylesheet" href="css/styles.css?v=20260820i" />
-<link rel="stylesheet" href="css/product.css?v=20260820i" />
+<link rel="stylesheet" href="css/styles.css?v=20260820j" />
+<link rel="stylesheet" href="css/product.css?v=20260820j" />
 </head>
 <body>
 
@@ -169,24 +169,24 @@
   <section id="arc-3">
     <div class="wrap reveal">
       <p class="label eyebrow">Arc three</p>
-      <h2 class="display section-headline">Putting payment in the right place.</h2>
-      <p class="section-body">An earlier version put payment first, before applicants filled out anything. More people paid, but completion barely moved. We had relocated the drop off, not reduced it, and refund requests climbed. Applicants did not understand what they were paying for, and many believed they were done the moment they paid.</p>
-      <p class="section-body">Payment placement was never the real variable. Comprehension was. Applicants now review their full application before paying, so they know exactly what they are submitting, and errors can be corrected before reports run. It also makes the reusable package easier to understand, since applicants have experienced the full application by the time they see it as an add on.</p>
+      <h2 class="display section-headline">Making payment make sense.</h2>
+      <p class="section-body">An earlier version put payment first. More people paid, but completion barely moved and refund requests climbed. We had shifted the drop-off without fixing it. Many applicants thought paying meant they were finished.</p>
+      <p class="section-body">That changed the hypothesis. In 3.0, applicants review the full application before paying, then see their reports before submitting. Each step makes the next commitment clear.</p>
 
       <div class="moment">
         <div class="moment-layout" id="payment-flow-layout">
           <div class="phone-mount" data-screen="payment"></div>
           <ol class="notes">
-            <li><span class="n">01</span><span>The progress bar reads "2 of 2," so payment shows up as a step inside the application, not a wall in front of it.</span></li>
-            <li><span class="n">02</span><span>"Your reports start running once you pay" replaces any suggestion that paying means submitting. Payment starts the reports. It does not end the application.</span></li>
-            <li><span class="n">03</span><span>The total breaks into line items, including the Reusable Screening Package, so applicants see exactly what $64.99 buys before they commit to it.</span></li>
+            <li><span class="n">01</span><span>Payment appears after the application review.</span></li>
+            <li><span class="n">02</span><span>The page explains that payment starts the reports. It does not submit the application.</span></li>
+            <li><span class="n">03</span><span>The total shows exactly what the fee includes, including the reusable package.</span></li>
           </ol>
         </div>
       </div>
 
       <div class="pull-moment" id="payment-flow-closing" style="margin-top: 40px;">
-        <p class="label pull-moment-eyebrow">Outcome</p>
-        <p class="pull-moment-statement">After payment, applicants can see their reports being prepared, review them, and choose when to send the application. &ldquo;Submit application&rdquo; marks the handoff to the agent, and the overview confirms the property is complete. Saving the card also makes the next steps easier, <span class="pull-moment-highlight">from the deposit through recurring rent</span>.</p>
+        <p class="label pull-moment-eyebrow">Hypothesis</p>
+        <p class="pull-moment-statement">If applicants see the full application before paying and their reports before submitting, they&rsquo;ll understand what they&rsquo;re buying and exactly when the application is sent.</p>
       </div>
     </div>
   </section>
@@ -200,7 +200,7 @@
         <div class="closing-text-col">
           <div class="closing-block">
             <h2 class="display section-headline">Making abandonment measurable</h2>
-            <p class="section-body">To improve completion, we needed to know exactly where applicants were leaving. I worked with engineering to add tracking across the new flow so we could see which sections were causing problems and what changed after each release.</p>
+            <p class="section-body">3.0 launches as an A/B test. We&rsquo;re watching total completion, completion after payment, and refund requests to see whether clearer expectations improve the full journey.</p>
           </div>
 
           <div class="closing-block">
@@ -234,14 +234,14 @@
     </div>
   </div>
 
-  <script src="js/screens.js?v=20260820i"></script>
-  <script src="js/phone.js?v=20260820i"></script>
-  <script src="js/payment-flow.js?v=20260820i"></script>
-  <script src="js/shell.js?v=20260820i"></script>
+  <script src="js/screens.js?v=20260820j"></script>
+  <script src="js/phone.js?v=20260820j"></script>
+  <script src="js/payment-flow.js?v=20260820j"></script>
+  <script src="js/shell.js?v=20260820j"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
-  <script src="js/app.js?v=20260820i"></script>
-  <script src="js/hero.js?v=20260820i"></script>
+  <script src="js/app.js?v=20260820j"></script>
+  <script src="js/hero.js?v=20260820j"></script>
 </body>
 </html>
