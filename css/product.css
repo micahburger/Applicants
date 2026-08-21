@@ -163,25 +163,26 @@
 .rs-card-title { font-family: var(--rs-font-body); font-weight: 700; font-size: 16px; margin: 0; }
 
 .rs-edit-btn {
-  border: 1px solid rgba(26, 26, 24, 0.16); background: transparent; border-radius: 999px;
+  /* Signal-tint fill (same pale blue as a selected radio row) rather than
+     a neutral outline — every Edit action on this screen is the same
+     action, so it reads as one recognizable CTA instead of blending into
+     the row like a secondary/quiet control. Text stays --rs-ink rather
+     than switching to --rs-signal: at 12px that's well under the "large
+     scale only" rule the accent color is held to elsewhere on this
+     screen (see the styleguide's contrast note), and --rs-signal on
+     --rs-signal-tint measures under 4.5:1 at body size anyway. */
+  border: 1px solid transparent; background: var(--rs-signal-tint); border-radius: 999px;
   /* Fixed height, matching .rs-step-badge's 26px circle exactly — padding
      plus this font's line-height alone rendered ~31px, 5px taller than the
      badge, which pushed every row below it down whenever a row picked up
      an Edit button (i.e. on every overview fresh/resumed toggle). */
   height: 26px; padding: 0 14px; display: inline-flex; align-items: center;
   font-family: var(--rs-font-body); font-size: 12px; font-weight: 600; color: var(--rs-ink);
-  transition: background-color .15s ease, border-color .15s ease, transform .1s ease;
+  transition: filter .15s ease, transform .1s ease;
 }
-.rs-edit-btn:hover { background: rgba(26, 26, 24, 0.05); border-color: rgba(26, 26, 24, 0.28); }
+.rs-edit-btn:hover { filter: brightness(0.96); }
 .rs-edit-btn:active { transform: scale(.96); }
 .rs-edit-btn:focus-visible { outline: 2px solid var(--rs-signal); outline-offset: 2px; }
-
-.rs-edit-link {
-  background: none; border: none; padding: 0; font-family: var(--rs-font-body); font-size: 13px; font-weight: 600;
-  color: var(--rs-ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px;
-}
-.rs-edit-link:hover { opacity: .7; }
-.rs-edit-link:focus-visible { outline: 2px solid var(--rs-signal); outline-offset: 2px; border-radius: 2px; }
 
 .rs-row {
   display: flex; align-items: baseline; justify-content: space-between; gap: 12px;

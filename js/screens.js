@@ -502,7 +502,7 @@ function reviewSubhead(text) {
 function reviewLinkRow(label) {
   return h('div', { class: 'rs-row rs-row--link' },
     h('span', { class: 'rs-row-label rs-row-label--strong', text: label }),
-    h('button', { class: 'rs-edit-link', text: 'Edit' })
+    h('button', { class: 'rs-edit-btn', text: 'Edit' })
   );
 }
 
