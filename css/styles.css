@@ -552,9 +552,27 @@ html {
   line-height: 1.15; color: var(--page-fg); margin: 0 0 16px; text-wrap: balance;
 }
 
-.notes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; max-width: 360px; }
+.notes {
+  list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; max-width: 360px;
+  /* align-self:start matters even in .moment-layout's grid (already
+     align-items:start there) because #review-layout's flex row uses
+     align-items:stretch for .moment-text's benefit — without this,
+     stretch would give notes a box as tall as the row itself, leaving
+     the sticky rule below nothing to actually move within. */
+  align-self: start;
+}
 .notes li { display: flex; gap: 14px; font-family: var(--font-body); font-size: 13px; line-height: 1.75; color: var(--page-soft); }
 .notes .n { font-family: var(--font-label); font-size: 12px; color: var(--page-muted); flex-shrink: 0; width: 16px; padding-top: 1px; }
+@media (min-width: 1000px) {
+  /* Sticky notes — locks at top:96px (clears the 56px top bar plus some
+     breathing room) as you scroll through a phone, then releases on its
+     own once its container (bounded by the taller phone column/row)
+     runs out of room, so it never scrolls past the phone it annotates.
+     Native sticky, no scroll listener — the height mismatch between the
+     short notes list and the taller phone column is what gives it
+     somewhere to travel before releasing. */
+  .notes { position: sticky; top: 96px; }
+}
 
 /* ── Diagnosis — the one earned numbered list ─────────────────────────── */
 .diagnosis-list { max-width: 720px; }

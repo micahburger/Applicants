@@ -76,8 +76,18 @@ function wireReveal() {
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-        observer.unobserve(entry.target);
+        const el = entry.target;
+        el.classList.add('is-visible');
+        // The reveal's own transform (translateY(24px) -> 0) settles at
+        // an identity value, but a lingering non-"none" transform still
+        // makes this element a new containing block for any
+        // position:sticky descendant — the payment/review/etc. notes
+        // lists inside these sections would stick to this wrapper
+        // instead of the viewport. Clearing it once the transition
+        // actually finishes removes that side effect without touching
+        // the (already-settled) visual position.
+        el.addEventListener('transitionend', () => { el.style.transform = 'none'; }, { once: true });
+        observer.unobserve(el);
       }
     });
   }, { threshold: 0.2 });
