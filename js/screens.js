@@ -241,7 +241,7 @@ function overview(state) {
         h('p', { class: 'rs-subtitle', text: 'Austin, TX 73301', style: 'margin-bottom:20px;' })
       ),
       h('div', { class: 'rs-card rs-agent-card' },
-        h('div', { class: 'rs-avatar' }, h('img', { src: 'img/agent/sarah-black.png', alt: '' })),
+        h('div', { class: 'rs-avatar' }, h('img', { src: 'img/agent/sarah-black-v2.png', alt: '' })),
         h('div', { class: 'rs-agent-meta' },
           h('p', { class: 'rs-agent-label', text: 'Application goes to' }),
           h('p', { class: 'rs-agent-name', text: 'Sarah Black' }),
