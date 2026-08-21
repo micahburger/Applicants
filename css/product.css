@@ -197,7 +197,7 @@
 /* ── Overview: agent card ─────────────────────────────────────────────── */
 .rs-agent-card { display: flex; align-items: center; gap: 12px; }
 .rs-avatar {
-  width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; background: var(--rs-fog);
+  width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0; background: var(--rs-fog);
   display: flex; align-items: center; justify-content: center; overflow: hidden;
   font-family: var(--rs-font-body); font-size: 13px; font-weight: 700; color: var(--rs-ink); opacity: .7;
 }

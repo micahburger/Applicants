@@ -245,7 +245,7 @@ function overview(state) {
         h('div', { class: 'rs-agent-meta' },
           h('p', { class: 'rs-agent-label', text: 'Application goes to' }),
           h('p', { class: 'rs-agent-name', text: 'Sarah Black' }),
-          h('p', { class: 'rs-agent-email', text: 'sarah.black@rentspree.com' })
+          h('p', { class: 'rs-agent-email', text: 'sarah.black@bluebonnetrealty.com' })
         )
       ),
       h('div', { class: 'rs-section-head' },
