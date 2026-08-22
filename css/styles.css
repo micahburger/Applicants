@@ -74,6 +74,22 @@
   --shadow-md: 0 20px 60px rgba(0, 0, 0, 0.32);
   --shadow-lg: 0 30px 80px rgba(0, 0, 0, 0.4);
 
+  /* ── Layered "soft" shadow for the transparent phone cutouts in the
+     thesis collage — a `filter: drop-shadow()` chain (space-separated,
+     not comma-separated like box-shadow) so it reads the PNGs' alpha
+     silhouette rather than their rectangular box. Five progressively
+     bigger/fainter passes stacked from one light source instead of one
+     hard-edged shadow, same umbra+penumbra idea as Josh Comeau's shadow
+     palette technique (joshwcomeau.com/css/designing-shadows) and the
+     Figma "Beautiful Shadows" plugin it inspired — light from the
+     upper-left, so each layer steps down and to the right. */
+  --shadow-collage-stack:
+    drop-shadow(2px 3px 4px rgba(0, 0, 0, 0.10))
+    drop-shadow(5px 8px 9px rgba(0, 0, 0, 0.09))
+    drop-shadow(10px 15px 16px rgba(0, 0, 0, 0.08))
+    drop-shadow(18px 26px 26px rgba(0, 0, 0, 0.07))
+    drop-shadow(30px 42px 40px rgba(0, 0, 0, 0.06));
+
   /* ── Layout — the deliberate break from lattice's edge-to-edge canvas ── */
   --content-max: 1080px;
   --gutter: clamp(20px, 6vw, 48px);
@@ -234,15 +250,11 @@ section {
    this section so the three tracks aren't cramped. */
 #arc-2 .wrap { max-width: 1407px; }
 
-/* Thesis breaks out of the centered reading column on desktop — the collage's
-   bleed only reads as "full width" if the section actually is, hugging the
-   left edge instead of sitting in a centered 1080px box with dead space on
-   both sides. Right edge keeps the normal gutter so the bled screens still
-   have a soft landing rather than touching the viewport edge. Desktop-only:
-   below 1000px .split stacks to a single column and the standard centered
-   wrap reads better than a 30px-narrow left margin. */
+/* Thesis needs more room than the 1080px reading column gives a text+phone
+   pair without feeling cramped — widened like #arc-2's 3-up split, but still
+   centered on the page rather than bled to an edge. */
 @media (min-width: 1000px) {
-  #thesis .wrap { max-width: none; padding-left: 30px; padding-right: var(--gutter); }
+  #thesis .wrap { max-width: 1300px; }
 }
 
 /* ── Device frame / bezel ─────────────────────────────────────────────────
@@ -325,7 +337,8 @@ html {
 }
 .reveal.is-visible { opacity: 1; transform: translateY(0); }
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .closing-block, .collage-front, .collage-stack img { opacity: 1; transform: none; transition: none; }
+  .reveal, .closing-block, .collage-front, .collage-mid, .collage-back { opacity: 1; transform: none; transition: none; }
+  .collage-replay { display: none; }
 }
 
 /* ── Sticky hairline bar — hidden while #hero is in view ─────────────────── */
@@ -440,58 +453,99 @@ html {
 .split-text { max-width: 500px; }
 .split-visual { display: flex; justify-content: center; }
 @media (min-width: 1000px) {
-  .split { flex-direction: row; justify-content: flex-end; align-items: center; gap: 64px; }
+  .split { flex-direction: row; justify-content: center; align-items: center; gap: 64px; }
   .split-visual { justify-content: flex-start; }
 }
 
 /* ── Thesis collage — flat PNG composite, not a live still-mount, all three
-   full screens at the same width with no clipping. Applications sits left,
-   in flow; the other two stack to its right at the same scale, taken clean
-   out of flow (position:absolute) and centered on the row, so their combined
-   height — taller than one screen — spills past the row's own box into the
-   hero/diagnosis whitespace above and below rather than being cropped to fit
-   it. z-index keeps that overflow paint on top of the neighboring sections
-   it bleeds into. PNGs are pre-masked to the phone's rounded silhouette on a
-   transparent ground, so drop-shadow (not box-shadow) reads as "lifted". ── */
+   full screens at the same width with no clipping, fanned out left-to-right
+   in a single overlapping deck (not a vertical stack) — applications.png on
+   top, howareyou.png and start.png stepping right and behind it at the same
+   scale. Taken clean out of flow (position:absolute on all three, sized by
+   the container) so the deck can bleed past its own row into the
+   hero/diagnosis whitespace above and below; z-index keeps that overflow
+   paint on top of the neighboring sections it bleeds into. PNGs are
+   pre-masked to the phone's rounded silhouette on a transparent ground, so
+   drop-shadow (not box-shadow) reads as "lifted" and each phone casts onto
+   the one behind it. ── */
 .collage-figure { display: flex; flex-direction: column; align-items: center; gap: 16px; min-width: 0; }
 .thesis-collage {
-  --collage-w: 520px;
+  --phone-w: 250px;
+  --phone-ratio: 916 / 421; /* source PNGs are 421x916 */
+  --stack-step: 145px; /* horizontal offset between each fanned phone */
+  --collage-w: calc(var(--phone-w) + var(--stack-step) * 2);
   --collage-fit: min(1, calc((100vw - 2 * var(--gutter)) / var(--collage-w)));
   position: relative;
   z-index: 5;
-  display: flex;
-  align-items: center;
   width: var(--collage-w);
+  height: calc(var(--phone-w) * var(--phone-ratio));
   zoom: var(--collage-fit);
 }
-.thesis-collage img { display: block; width: 250px; flex-shrink: 0; filter: drop-shadow(var(--shadow-lg)); }
-.collage-stack {
+.thesis-collage img {
+  display: block;
   position: absolute;
-  left: 270px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  top: 0;
+  left: 0;
+  width: var(--phone-w);
+  aspect-ratio: 421 / 916;
+  filter: var(--shadow-collage-stack);
 }
+.thesis-collage .collage-front { z-index: 3; }
+.thesis-collage .collage-mid   { left: var(--stack-step); z-index: 2; }
+.thesis-collage .collage-back  { left: calc(var(--stack-step) * 2); z-index: 1; }
 
 /* Build-in — the three screens arrive one at a time (applications list,
-   then the tenant/cosigner role screen, then the overview) instead of
-   fading up as one flat group, so the opening moment reads as an intro
-   rather than just another reveal. Piggybacks on the section's own
-   .wrap.reveal trigger — no separate observer needed, just a longer,
-   staggered version of the same fade+rise every .reveal already does. */
-.collage-front, .collage-stack img {
-  opacity: 0;
-  transform: translateY(20px);
+   then the tenant/cosigner role screen, then the overview), each fading in
+   and sliding a short, subtle distance left into its place in the fan —
+   not sliding in from off screen, just a small nudge from --start-offset
+   right of its own resting spot. No scale: opacity + a pure leftward
+   translateX only. Delays are spaced a full --duration apart (not
+   overlapping, like the short stagger elsewhere on the page) so each
+   screen finishes arriving before the next starts. Keyed off
+   .thesis-collage's own is-visible rather than the section wrap's — it
+   needs to be independently replayable via the button below without also
+   re-triggering the headline/body text's fade+rise, which share the wrap's
+   .reveal.is-visible. See wireCollageReplay() in shell.js for both the
+   scroll-triggered first play and the replay click handler (which must
+   wait out --duration on the way out too — see the comment there). */
+.thesis-collage {
   /* 2x --reveal-slow (700ms -> 1400ms), scoped here rather than doubling
      the shared token itself — --reveal-slow drives other reveals on the
      page that weren't asked to slow down. */
-  transition: opacity 1.4s var(--ease-enter), transform 1.4s var(--ease-enter);
+  --duration: 1.4s;
+  --start-offset: 80px;
 }
-.wrap.reveal.is-visible .collage-front { opacity: 1; transform: none; }
-.wrap.reveal.is-visible .collage-stack img:nth-child(1) { opacity: 1; transform: none; transition-delay: .4s; }
-.wrap.reveal.is-visible .collage-stack img:nth-child(2) { opacity: 1; transform: none; transition-delay: .8s; }
+.collage-front, .collage-mid, .collage-back {
+  opacity: 0;
+  transform: translateX(var(--start-offset));
+  transition: opacity var(--duration) var(--ease-enter), transform var(--duration) var(--ease-enter);
+}
+.thesis-collage.is-visible .collage-front { opacity: 1; transform: translateX(0); }
+.thesis-collage.is-visible .collage-mid   { opacity: 1; transform: translateX(0); transition-delay: var(--duration); }
+.thesis-collage.is-visible .collage-back  { opacity: 1; transform: translateX(0); transition-delay: calc(var(--duration) * 2); }
+
+/* Replay link — plain text control, not an accent-colored one: --page-accent
+   is reserved for large-scale marks (see the "Accent discipline" note near
+   .pull-line above), so hover/focus just brightens muted -> soft instead. */
+.collage-replay {
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--page-muted);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: transparent;
+  transition: color .15s ease, text-decoration-color .15s ease;
+}
+.collage-replay:hover, .collage-replay:focus-visible { color: var(--page-soft); text-decoration-color: currentColor; }
+.collage-replay:focus-visible { outline: 2px solid var(--page-accent); outline-offset: 4px; }
+.collage-replay:disabled { cursor: default; opacity: .5; text-decoration-color: transparent; }
 
 .moment { padding: 40px 0; }
 .moment:first-of-type { padding-top: 0; }

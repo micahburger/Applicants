@@ -87,11 +87,36 @@ function wireReveal() {
         // actually finishes removes that side effect without touching
         // the (already-settled) visual position.
         el.addEventListener('transitionend', () => { el.style.transform = 'none'; }, { once: true });
+        // The thesis collage plays its own build-in, kept on a separate
+        // is-visible flag (not the wrap's) so the replay button below it
+        // can re-trigger just the phones without re-fading this headline/
+        // body copy — but it should still fire at the same moment the rest
+        // of the section does, so it piggybacks on this same observer
+        // instead of running a second one.
+        const collage = el.querySelector('.thesis-collage');
+        if (collage) collage.classList.add('is-visible');
         observer.unobserve(el);
       }
     });
   }, { threshold: 0.2 });
   targets.forEach(t => observer.observe(t));
+}
+
+/* ── Thesis collage replay ────────────────────────────────────────────── */
+function wireCollageReplay() {
+  const collage = document.querySelector('.thesis-collage');
+  const button = document.querySelector('.collage-replay');
+  if (!collage || !button) return;
+
+  if (shellReducedMotion) return;
+
+  button.addEventListener('click', () => {
+    collage.classList.remove('is-visible');
+    // Wait out the fade-out (1.4s, matches the transition duration in
+    // styles.css) before fading back in — re-adding is-visible right away
+    // just reverses the barely-started fade instead of letting it finish.
+    setTimeout(() => { collage.classList.add('is-visible'); }, 1400);
+  });
 }
 
 /* ── V1 sheet — full-screen takeover of the original RentSpree screens,
@@ -207,6 +232,7 @@ function initShell() {
   const topBarNameEl = wireTopBar();
   wireSectionTracking(topBarNameEl);
   wireReveal();
+  wireCollageReplay();
   wirePillNav();
   wireKeyboardNav();
   wireV1Sheet();
