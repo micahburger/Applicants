@@ -1,48 +1,40 @@
 /* ============================================================================
-   APPLICANTS — the lab. Different layouts for the intro and the three arcs,
-   switched from a pill in the corner, so they can be compared on the real
-   page before one wins. v2's lab (v2-site/app/src/lab.ts, LabPanel.tsx) is
-   the model: the same pill and panel, the choice carried in the query string
-   only (?intro=brief&arcs=split), so a link is shareable and a plain link
-   gets the defaults. Each list leads with its default, which is Current, the
-   live layout, until a take is picked.
+   APPLICANTS — the lab. Layouts for one section at a time, switched from a
+   pill in the corner, so they can be compared on the real page before one
+   wins. v2's lab (v2-site/app/src/lab.ts, LabPanel.tsx) is the model: the
+   same pill and panel, the choice carried in the query string only
+   (?close=row), so a link is shareable and a plain link gets the default.
+   Each list leads with its default, which is the live layout until a take
+   is picked.
 
-   Why these takes (Micah, 2026-11-10): the intro (a headline over two
-   paragraphs beside the collage) and the arcs (title, paragraphs, then a
-   phone beside long numbered notes) felt cluttered. The new takes borrow
-   Opendoor's case study on v2 (/project/opendoor) so the two read as one
-   system: an opening paragraph with the brief as labelled facts, and arcs
-   cut to a title, a short lede, the phone and a few titled notes.
+   History: the first round (2026-11-10) compared the intro (Current, Brief,
+   Stacked) and the arcs (Current, Split, Side, Stage), modelled on the
+   Opendoor case study on v2. Micah picked Brief and Side; both are now the
+   page's only layouts, in styles.css, and left the lab.
 
-   How it works: every take of a section is in the markup at once. The
-   current layout is wrapped in .take--old, the new one in .take--new, and
-   css/lab.css shows one or the other from <html data-intro|data-arcs>
-   (set before first paint by the inline script in index.html). The live
-   phones and the thesis collage are built once and moved, not copied, into
-   whichever take is showing: copies would double the phones' listeners and
-   lose their state. Each one is tagged data-media="<name>" and each place
-   for it in a new take data-holds="<name>"; a hidden marker left where it
-   was built is where it goes back to for Current.
+   Now: the close, the three blocks beside the hand-holding-a-phone photo
+   (evaluation, the prototype, applicant to tenant). Micah suggested the
+   three side by side with the photo on top; the other takes vary that.
 
-   Once a take wins, fold its markup and CSS into the page and delete the
-   others, css/lab.css and this file.
+   How it works: the close has one set of markup. This only sets
+   <html data-close>, which css/lab.css reads to lay it out (the inline
+   script in index.html sets it before first paint too). Nothing is moved,
+   so the blocks' staggered build-in keeps working in every take.
+
+   Once a take wins, fold its CSS into styles.css and delete the others,
+   css/lab.css and this file.
    ============================================================================ */
 
 const LAB = {
-  intro: [
+  close: [
     { id: 'current', label: 'Current' },
-    { id: 'brief',   label: 'Brief' },
-    { id: 'stacked', label: 'Stacked' },
-  ],
-  arcs: [
-    { id: 'current', label: 'Current' },
-    { id: 'split',   label: 'Split' },
-    { id: 'side',    label: 'Side' },
-    { id: 'stage',   label: 'Stage' },
+    { id: 'row',     label: 'Row' },
+    { id: 'overlap', label: 'Overlap' },
+    { id: 'cards',   label: 'Cards' },
   ],
 };
 
-const LAB_TITLES = { intro: 'Intro', arcs: 'Arcs' };
+const LAB_TITLES = { close: 'Close' };
 
 function readLab() {
   const params = new URLSearchParams(window.location.search);
@@ -56,42 +48,15 @@ function readLab() {
 
 function writeLab(state) {
   const params = new URLSearchParams(window.location.search);
+  // Links from the first round may still carry these; both left the lab.
+  params.delete('intro');
+  params.delete('arcs');
   Object.keys(state).forEach(key => params.set(key, state[key]));
   window.history.replaceState(null, '', `${window.location.pathname}?${params}${window.location.hash}`);
 }
 
-/* name -> { el, home } for every movable piece of media. */
-const labMedia = new Map();
-
-function collectMedia() {
-  document.querySelectorAll('[data-media]').forEach(el => {
-    const home = document.createElement('span');
-    home.hidden = true;
-    el.before(home);
-    labMedia.set(el.dataset.media, { el, home });
-  });
-}
-
-/* Move each piece of a section's media into its new take, or back home. */
-function placeMedia(section, useNew) {
-  if (!section) return;
-  section.querySelectorAll('[data-holds]').forEach(holder => {
-    const entry = labMedia.get(holder.dataset.holds);
-    if (!entry) return;
-    if (useNew) {
-      if (entry.el.parentNode !== holder) holder.appendChild(entry.el);
-    } else if (entry.home.nextSibling !== entry.el) {
-      entry.home.after(entry.el);
-    }
-  });
-}
-
 function applyLab(state) {
-  const root = document.documentElement;
-  root.dataset.intro = state.intro;
-  root.dataset.arcs = state.arcs;
-  placeMedia(document.getElementById('thesis'), state.intro !== 'current');
-  document.querySelectorAll('section.arc').forEach(s => placeMedia(s, state.arcs !== 'current'));
+  Object.keys(state).forEach(key => { document.documentElement.dataset[key] = state[key]; });
 }
 
 /* The pill and panel, built the way v2's LabPanel renders: collapsed to one
@@ -118,26 +83,29 @@ function buildLabPanel(state) {
     seg.setAttribute('role', 'radiogroup');
     seg.setAttribute('aria-label', LAB_TITLES[key]);
 
-    LAB[key].forEach(option => {
+    const buttons = LAB[key].map(option => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.setAttribute('role', 'radio');
       btn.textContent = option.label;
-      const sync = () => {
-        const on = state[key] === option.id;
-        btn.classList.toggle('is-on', on);
-        btn.setAttribute('aria-checked', String(on));
-      };
-      sync();
+      btn.dataset.value = option.id;
       btn.addEventListener('click', () => {
         state[key] = option.id;
-        seg.querySelectorAll('button').forEach(b => b.dispatchEvent(new Event('lab-sync')));
+        sync();
         applyLab(state);
         writeLab(state);
       });
-      btn.addEventListener('lab-sync', sync);
       seg.appendChild(btn);
+      return btn;
     });
+    function sync() {
+      buttons.forEach(b => {
+        const on = b.dataset.value === state[key];
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-checked', String(on));
+      });
+    }
+    sync();
 
     row.append(title, seg);
     panel.appendChild(row);
@@ -161,11 +129,9 @@ function buildLabPanel(state) {
 }
 
 function initLab() {
-  // Runs after phone.js has built the phones: both listen for
-  // DOMContentLoaded, and this script is included after it.
-  collectMedia();
   const state = readLab();
   applyLab(state);
+  writeLab(state);
   buildLabPanel(state);
 }
 

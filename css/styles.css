@@ -288,18 +288,6 @@ section {
   padding-top: 0;
   padding-bottom: 0;
 }
-/* Arc two's 3-up split (text | phone | notes) needs more breathing room than
-   the 1080px reading column gives a single block of prose — widened just for
-   this section so the three tracks aren't cramped. */
-#arc-2 .wrap { max-width: 1407px; }
-
-/* Thesis needs more room than the 1080px reading column gives a text+phone
-   pair without feeling cramped — widened like #arc-2's 3-up split, but still
-   centered on the page rather than bled to an edge. */
-@media (min-width: 1000px) {
-  #thesis .wrap { max-width: 1300px; }
-}
-
 /* ── Device frame / bezel ─────────────────────────────────────────────────
    Bezel goes lighter than the page, not darker: a black bezel would merge
    into --page-bg and the phone would read as a floating rectangle instead of
@@ -518,14 +506,58 @@ html {
 .section-body { font-family: var(--font-body); font-weight: 400; font-size: var(--cs-body); line-height: 1.6; color: var(--page-soft); max-width: 640px; margin: 0; }
 .section-body + .section-body { margin-top: 16px; }
 
-/* ── Thesis intro — text + phone as one centered bundle, not a full-width
-   two-column split. Only usage of .split/.split-visual on the page. ────── */
-.split { display: flex; flex-direction: column; align-items: center; gap: 48px; }
-.split-text { max-width: 500px; }
-.split-visual { display: flex; justify-content: center; }
+/* ── Context — the opening (Micah, 2026-11-10: "Brief", picked from a lab
+   of three). Opendoor's intro on v2 (.cs-intro in v2's global.css): the
+   headline and the case for the work in six columns with the brief under
+   them as labelled facts on a card a 6% lift lighter than the page, and the
+   collage in the other six, centred on each other. It replaced a headline
+   over two paragraphs beside the collage, which read as cluttered. ──── */
+.intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 48px;
+}
+.intro-text { display: grid; gap: 24px; align-content: start; }
+.intro-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: var(--cs-heading);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--page-fg);
+  text-wrap: balance;
+}
+/* v2's --cs-lede: the opening paragraphs a step up from body. */
+.intro-lede {
+  margin: 0;
+  max-width: 600px;
+  font-size: var(--cs-lede);
+  line-height: 1.5;
+  color: var(--page-soft);
+}
+/* v2's .cs-facts. */
+.intro-facts {
+  display: grid;
+  gap: 20px;
+  margin: 0;
+  padding: 28px 32px;
+  border-radius: var(--radius-card);
+  background: var(--page-surface);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.intro-facts dt { font-weight: 500; color: var(--page-fg); }
+.intro-facts dd { margin: 0; color: var(--page-soft); }
+.intro-media { display: flex; justify-content: center; min-width: 0; }
 @media (min-width: 1000px) {
-  .split { flex-direction: row; justify-content: center; align-items: center; gap: 64px; }
-  .split-visual { justify-content: flex-start; }
+  .intro {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    align-items: center;
+  }
+  .intro-text { grid-column: 1 / span 6; padding-right: 40px; }
+  .intro-media { grid-column: 7 / span 6; }
 }
 
 /* ── Thesis collage — flat PNG composite, not a live still-mount, all three
@@ -617,86 +649,84 @@ html {
 .collage-replay:focus-visible { outline: 2px solid var(--page-accent); outline-offset: 4px; }
 .collage-replay:disabled { cursor: default; opacity: .5; text-decoration-color: transparent; }
 
-.moment { padding: 40px 0; }
-.moment:first-of-type { padding-top: 0; }
-.moment-heading {
-  /* v2's .cs-label: small, 500, a hair of tracking, quiet. */
-  font-family: var(--font-label); font-size: var(--cs-small); font-weight: 500; letter-spacing: 0.02em;
-  color: var(--page-muted); margin: 30px 0 24px;
+/* ── Arcs — progress, review, payment (Micah, 2026-11-10: "Side", picked
+   from a lab of four). Every arc is the same three parts: a head (title and
+   one short lede), the live phone, and a few titled notes, the way
+   Opendoor's study on v2 sets a screen beside its notes. Nothing sits above
+   the phone; the head and notes are one column beside it, centred on its
+   height, so each arc reads as one picture-and-caption unit. --flip puts
+   the phone on the right, so the page alternates.
+
+   It replaced a title and paragraphs over a phone beside long numbered
+   notes (and, in the review arc, a three-column text | phone | notes row),
+   which read as cluttered. Those numbered notes were also sticky; with the
+   notes beside a phone of about their own height there's nowhere for them
+   to travel, so that went too. ────────────────────────────────────── */
+.arc-block {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 40px;
 }
-/* Arc three has no moment-heading ahead of its phone (unlike arc-1's
-   moments), so without its own top space it sits flush against the
-   section body copy above — same fix as .moment-heading, just applied
-   directly since there's no label element here to carry it. */
-#payment-flow-layout { margin-top: 30px; }
-.moment-layout { display: grid; grid-template-columns: 1fr; gap: 40px; align-items: start; }
-@media (min-width: 1000px) { .moment-layout { grid-template-columns: auto 1fr; gap: 64px; } }
+.arc-block + .arc-block { margin-top: var(--cs-block); }
+.arc-title {
+  margin: 0;
+  max-width: 900px;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: var(--cs-heading);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--page-fg);
+  text-wrap: balance;
+}
+/* v2's .cs-lede: body size, held to a readable measure. */
+.arc-lede {
+  margin: 16px 0 0;
+  max-width: 640px;
+  font-size: var(--cs-body);
+  line-height: 1.6;
+  color: var(--page-soft);
+}
+.arc-media { display: flex; justify-content: center; min-width: 0; }
+/* About Opendoor's phone-screen size (its cut-outs take three columns,
+   ~280px; these carry a bezel and their controls, so a little more).
+   Compounds with the frame's own fit-to-viewport zoom. */
+.arc-media .phone-frame { zoom: calc(0.8 * var(--frame-fit)); }
+/* v2's .cs-notes: titled, not numbered. */
+.arc-notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 28px;
+  align-content: start;
+}
+.arc-notes h3 {
+  margin: 0 0 6px;
+  font-family: var(--font-heading);
+  font-size: var(--cs-body);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--page-fg);
+}
+.arc-notes p { margin: 0; font-size: var(--cs-body); line-height: 1.6; color: var(--page-soft); }
+
 @media (min-width: 1000px) {
-  /* Arc two's review moment is a centered 3-up bundle — text | phone |
-     notes — not a grid stretched to fill the wrap. justify-content:center
-     centers the whole group in the browser the same way .split does for
-     the thesis intro; align-items:stretch (flex's default, made explicit
-     here) lets the text column reach the row's full height so its
-     follow-up paragraph sits low, near the phone/notes' natural bottom —
-     phone-figure and notes stay visually top-anchored since neither of them
-     stretches its own children, just the empty track space below them. */
-  #review-layout {
-    display: flex;
-    justify-content: center;
-    align-items: stretch;
-    gap: 28px;
+  /* The outer 1fr rows soak up the phone's extra height equally, which is
+     what centres the head-and-notes column on it. */
+  .arc-block {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: 1fr auto auto 1fr;
+    column-gap: var(--gutter);
+    row-gap: 0;
   }
-  /* Natural widths (480 + 416 + 360 + gaps ≈ 1312px) don't clear 1080's
-     content-max until a genuinely wide viewport. flex-wrap used to be the
-     fix here, but wrapping dropped notes onto its own line below the
-     phone instead of keeping the 3-up row intact — wrong result, notes
-     belongs beside the phone. The phone has no give of its own (see next
-     rule), so text and notes are the two that flex, splitting the deficit
-     between them and settling back at their true 480/360 once the
-     viewport actually has room — same shrink-not-wrap approach as the
-     closing section's photo/text pair. */
-  .moment-text { flex: 0 1 480px; min-width: 280px; }
-  .notes { flex: 0 1 360px; min-width: 220px; }
-  /* Flexbox's default shrink was squeezing the phone (no intrinsic
-     min-width of its own to resist with) down to ~343px instead of its
-     true ~414px zoomed size, even with room to spare elsewhere — pin it
-     to its natural size so it never gives up width to the other two. */
-  #review-layout > .phone-figure { flex-shrink: 0; }
-}
-.moment-hairline { border-top: 1px solid var(--page-rule); margin: 8px 0 0; }
-.moment-text { display: flex; flex-direction: column; justify-content: space-between; gap: 32px; }
-.moment-followup { margin-top: 20px; }
-
-.moment-title {
-  /* Matches .section-headline's actual rendered size — its own font-size
-     (38px, fixed) sits later in this file than .display's responsive
-     clamp() and wins the cascade on every "display section-headline"
-     heading, so 38px fixed is genuinely what "the other headlines" are,
-     not --size-display. */
-  font-family: var(--font-heading); font-weight: 400; font-size: var(--cs-heading);
-  line-height: 1.25; letter-spacing: -0.01em; color: var(--page-fg); margin: 0 0 16px; text-wrap: balance;
-}
-
-.notes {
-  list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px; max-width: 360px;
-  /* align-self:start matters even in .moment-layout's grid (already
-     align-items:start there) because #review-layout's flex row uses
-     align-items:stretch for .moment-text's benefit — without this,
-     stretch would give notes a box as tall as the row itself, leaving
-     the sticky rule below nothing to actually move within. */
-  align-self: start;
-}
-.notes li { display: flex; gap: 14px; font-family: var(--font-body); font-size: var(--cs-body); line-height: 1.6; color: var(--page-soft); }
-.notes .n { font-family: var(--font-label); font-size: var(--cs-small); font-weight: 500; color: var(--page-accent); flex-shrink: 0; width: 18px; padding-top: 3px; }
-@media (min-width: 1000px) {
-  /* Sticky notes — locks at top:96px (clears the 56px top bar plus some
-     breathing room) as you scroll through a phone, then releases on its
-     own once its container (bounded by the taller phone column/row)
-     runs out of room, so it never scrolls past the phone it annotates.
-     Native sticky, no scroll listener — the height mismatch between the
-     short notes list and the taller phone column is what gives it
-     somewhere to travel before releasing. */
-  .notes { position: sticky; top: 96px; }
+  .arc-media { grid-column: 1 / span 6; grid-row: 1 / -1; }
+  .arc-head { grid-column: 7 / span 5; grid-row: 2; }
+  .arc-notes { grid-column: 7 / span 5; grid-row: 3; margin-top: 40px; }
+  .arc-block:not(:has(.arc-head)) .arc-notes { margin-top: 0; }
+  .arc-block--flip .arc-media { grid-column: 7 / span 6; }
+  .arc-block--flip .arc-head,
+  .arc-block--flip .arc-notes { grid-column: 2 / span 5; }
 }
 
 /* ── Diagnosis — the one earned numbered list ─────────────────────────── */
@@ -736,9 +766,7 @@ html {
    "never under 18px" accent-discipline floor (see the note up near
    --page-accent's definition). */
 .pull-moment { max-width: 925px; margin: 0 auto; }
-/* Was an inline style; here so the lab's takes (css/lab.css) can give it
-   their own room. */
-#payment-flow-closing { margin-top: 40px; }
+#payment-flow-closing { margin-top: var(--cs-block); }
 .pull-moment-eyebrow { margin: 0 0 16px; }
 .pull-moment-statement {
   /* v2's .cs-statement: the numbers as one large sentence, the key
@@ -780,7 +808,7 @@ html {
      22px gap — gap can't go negative in CSS, so the photo instead carries
      an 8px negative margin, landing it slightly under the text column's
      edge. Centered as that tight pair within the wider 1482px wrap, same
-     justify-content:center pattern as .split above, rather than stretched
+     justify-content:center pattern used elsewhere, rather than stretched
      to the wrap's full width. */
   .closing-composite { display: flex; flex-direction: row; justify-content: center; align-items: flex-start; gap: 0; }
   /* Text (460) + photo (747) sum past 1080's content-max as soon as the
@@ -843,7 +871,7 @@ html {
 @media (min-width: 1000px) { .phone-row { flex-direction: row; justify-content: center; align-items: flex-start; } }
 
 /* min-width: 0 overrides the grid/flex default of min-width: auto — without
-   it, a moment-layout grid track won't shrink below the phone-frame's
+   it, a grid track won't shrink below the phone-frame's
    min-content size (the .product's hard-coded 390px), so at narrow
    viewports the frame blows out past its column and the whole page gains
    ~50px of horizontal scroll. Found by measuring document.scrollWidth vs

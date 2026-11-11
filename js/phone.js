@@ -39,9 +39,6 @@ function buildPhone(mountEl) {
 
   const figure = document.createElement('div');
   figure.className = 'phone-figure';
-  // The lab (js/lab.js) finds each phone by this name to move it between
-  // layouts; the mount it was tagged on is replaced below.
-  if (mountEl.dataset.media) figure.dataset.media = mountEl.dataset.media;
 
   const frame = document.createElement('div');
   frame.className = 'phone-frame' + (size === 'sm' ? ' frame--sm' : '');
