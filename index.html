@@ -8,6 +8,17 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23161516'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%239C8B70'/%3E%3C/svg%3E" />
 <link rel="stylesheet" href="css/styles.css?v=20261110b" />
 <link rel="stylesheet" href="css/product.css?v=20261110b" />
+<link rel="stylesheet" href="css/lab.css?v=20261110a" />
+<!-- The lab's takes (js/lab.js), set before first paint so a shared link
+     like ?arcs=split doesn't flash the current layout first. lab.js checks
+     the values and falls back to the defaults for anything it doesn't know. -->
+<script>
+  (function () {
+    var q = new URLSearchParams(location.search), d = document.documentElement;
+    d.dataset.intro = q.get('intro') || 'current';
+    d.dataset.arcs = q.get('arcs') || 'current';
+  })();
+</script>
 </head>
 <body>
 
@@ -41,6 +52,7 @@
   <!-- ═══ 2 · THESIS ═════════════════════════════════════════════════════ -->
   <section id="thesis">
     <div class="wrap reveal">
+      <div class="take take--old">
       <div class="split">
         <div class="split-text">
           <p class="label eyebrow">Business impact</p>
@@ -49,7 +61,7 @@
           <p class="section-body">The redesign focused on helping more applicants finish and improving the information agents receive. It also created a path from the first application payment to deposits and rent after approval.</p>
         </div>
         <div class="split-visual">
-          <div class="collage-figure">
+          <div class="collage-figure" data-media="collage">
             <div class="thesis-collage">
               <img class="collage-front" src="img/thesis/applications.png"
                    alt="Applications list showing three rental applications: not started, in progress, and submitted." />
@@ -59,6 +71,26 @@
             <button type="button" class="collage-replay">Replay animation</button>
           </div>
         </div>
+      </div>
+      </div>
+
+      <!-- LAB · Intro (Brief, Stacked). Opendoor's opening: the case for the
+           work in one paragraph, then the brief as labelled facts in a
+           card, in place of a headline over two paragraphs. Brief drops the
+           headline, as Opendoor's intro has none; Stacked keeps it and sets
+           the facts in a row under the collage. The collage itself is moved
+           in here by js/lab.js, not copied, so its build-in still plays. -->
+      <div class="take take--new intro-take">
+        <div class="intro-text">
+          <h2 class="intro-title">Most of the business runs through applications.</h2>
+          <p class="intro-lede">Applications carry most of RentSpree&rsquo;s transactions and most of its revenue, so helping more applicants finish has a direct effect on the business.</p>
+          <dl class="intro-facts">
+            <div><dt>Objective</dt><dd>Help more applicants finish, and give agents clearer information to screen with.</dd></div>
+            <div><dt>Beyond the application</dt><dd>A path from the first application payment to deposits and rent after approval.</dd></div>
+            <div><dt>Measuring</dt><dd>3.0 launches as an A/B test on completion, completion after payment, and refund requests.</dd></div>
+          </dl>
+        </div>
+        <div class="intro-media" data-holds="collage"></div>
       </div>
     </div>
   </section>
@@ -95,8 +127,9 @@
   </section>
 
   <!-- ═══ 4 · ARC ONE ════════════════════════════════════════════════════ -->
-  <section id="arc-1">
+  <section id="arc-1" class="arc">
     <div class="wrap reveal">
+      <div class="take take--old">
       <p class="label eyebrow">Arc one</p>
       <h2 class="display section-headline">Designed to be picked back up.</h2>
       <p class="section-body">Reducing the number of steps helped, but the bigger change was giving the application a visible structure. The overview shows everything that remains, keeps completed work visible, and lets applicants edit finished sections without retracing the flow.</p>
@@ -105,7 +138,7 @@
       <div class="moment">
         <p class="moment-heading">Moment one</p>
         <div class="moment-layout">
-          <div class="phone-mount" data-screen="overview"
+          <div class="phone-mount" data-screen="overview" data-media="overview"
                data-caption="Click in — then switch between a fresh application and a resumed one"
                data-states='["Resumed","Not started"]'></div>
           <ol class="notes">
@@ -124,16 +157,46 @@
         <h3 class="moment-title">Keeping progress predictable.</h3>
         <p class="section-body" style="margin-bottom: 24px;">Conditional questions open inline, keeping the application at four predictable steps. Additional adults receive their own application, while the optional under-18 count is used only for household size. This helps keep family status separate from screening.</p>
         <div class="moment-layout">
-          <div class="phone-mount" data-screen="household"
+          <div class="phone-mount" data-screen="household" data-media="household"
                data-caption="Tap Yes to see the page expand without changing the step count."></div>
+        </div>
+      </div>
+      </div>
+
+      <!-- LAB · Arcs (Split, Side, Stage). The same three pieces in every
+           arc, so one arc reads like the next and like Opendoor's study: a
+           title with one short lede, the phone, and a few titled notes. The
+           notes are the old numbered paragraphs cut down to a title and a
+           sentence or two; the takes only change where the pieces sit (see
+           css/lab.css). The phones are moved in here by js/lab.js. -->
+      <div class="take take--new">
+        <div class="arc-take">
+          <header class="arc-head">
+            <h2 class="arc-title">Designed to be picked back up.</h2>
+            <p class="arc-lede">Fewer steps helped, but the bigger change was giving the application a visible structure: what&rsquo;s done, what&rsquo;s left, and a clear place to return to across several sittings.</p>
+          </header>
+          <div class="arc-media" data-holds="overview"></div>
+          <ul class="arc-notes">
+            <li><h3>Progress you can read</h3><p>A finished step turns into a check with an Edit action. The current step keeps its number, so what comes next is always clear.</p></li>
+            <li><h3>Continue, not start over</h3><p>Start application becomes Continue when someone comes back.</p></li>
+            <li><h3>Edit without backtracking</h3><p>Edit appears only on finished sections, so correcting an answer never means walking back through the flow.</p></li>
+            <li><h3>Know who receives it</h3><p>The agent is named at the top. Applicants are sharing sensitive financial information, so they should know who it goes to.</p></li>
+          </ul>
+        </div>
+        <div class="arc-take arc-take--flip">
+          <div class="arc-media" data-holds="household"></div>
+          <ul class="arc-notes">
+            <li><h3>Keeping progress predictable</h3><p>Conditional questions open inline, so the application stays at four steps. Additional adults get their own application, and the optional under-18 count is used only for household size, keeping family status separate from screening.</p></li>
+          </ul>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ═══ 5 · ARC TWO ════════════════════════════════════════════════════ -->
-  <section id="arc-2">
+  <section id="arc-2" class="arc">
     <div class="wrap reveal">
+      <div class="take take--old">
       <p class="label eyebrow">Arc two</p>
 
       <div class="moment">
@@ -149,7 +212,7 @@
               <p class="section-body moment-followup">Once the mistake appeared in a report, the report had already been pulled. Field validation wouldn't catch every error, so applicants needed a full review before anything was sent to the bureau.</p>
             </div>
           </div>
-          <div class="phone-mount" data-screen="review"></div>
+          <div class="phone-mount" data-screen="review" data-media="review"></div>
           <ol class="notes">
             <li><span class="n">01</span><span>Every section can be edited directly from the review page. Applicants can correct an answer while they still have control over it.</span></li>
             <li><span class="n">02</span><span>"Check everything before it goes to Sarah. You can still edit." The description names the person and the deadline in one line.</span></li>
@@ -157,12 +220,31 @@
           </ol>
         </div>
       </div>
+      </div>
+
+      <!-- LAB · Arcs. The support story is the lede; the follow-up paragraph
+           and note 03 (nothing irreversible yet) fold into the first note. -->
+      <div class="take take--new">
+        <div class="arc-take">
+          <header class="arc-head">
+            <h2 class="arc-title">Catching errors before they cost money.</h2>
+            <p class="arc-lede">Support kept hearing from applicants whose credit or background report was wrong because of something they had typed: a misspelled legal name, an old address, a transposed digit. Once the report was pulled, it was too late to fix the source.</p>
+          </header>
+          <div class="arc-media" data-holds="review"></div>
+          <ul class="arc-notes">
+            <li><h3>A full review before the bureau</h3><p>Field validation can&rsquo;t catch every mistake, so applicants check everything before anything is sent. Nothing irreversible has happened yet.</p></li>
+            <li><h3>Edit from the review</h3><p>Every section can be edited right from the review page, while the applicant still has control over it.</p></li>
+            <li><h3>Who, and how long</h3><p>&ldquo;Check everything before it goes to Sarah. You can still edit.&rdquo; One line names the person and the deadline.</p></li>
+          </ul>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ═══ 6 · ARC THREE ══════════════════════════════════════════════════ -->
-  <section id="arc-3">
+  <section id="arc-3" class="arc">
     <div class="wrap reveal">
+      <div class="take take--old">
       <p class="label eyebrow">Arc three</p>
       <h2 class="display section-headline">Making payment make sense.</h2>
       <p class="section-body">An earlier version put payment first. More people paid, but completion barely moved and refund requests climbed. We had shifted the drop-off without fixing it. Many applicants thought paying meant they were finished.</p>
@@ -170,7 +252,7 @@
 
       <div class="moment">
         <div class="moment-layout" id="payment-flow-layout">
-          <div class="phone-mount" data-screen="payment"></div>
+          <div class="phone-mount" data-screen="payment" data-media="payment"></div>
           <ol class="notes">
             <li><span class="n">01</span><span>Payment appears after the application review.</span></li>
             <li><span class="n">02</span><span>The page explains that payment starts the reports. It does not submit the application.</span></li>
@@ -178,8 +260,25 @@
           </ol>
         </div>
       </div>
+      </div>
 
-      <div class="pull-moment" id="payment-flow-closing" style="margin-top: 40px;">
+      <!-- LAB · Arcs. The hypothesis below is shared by every take. -->
+      <div class="take take--new">
+        <div class="arc-take arc-take--flip">
+          <header class="arc-head">
+            <h2 class="arc-title">Making payment make sense.</h2>
+            <p class="arc-lede">An earlier version put payment first. More people paid, but completion barely moved and refund requests climbed: many applicants thought paying meant they were finished. In 3.0, each step makes the next commitment clear.</p>
+          </header>
+          <div class="arc-media" data-holds="payment"></div>
+          <ul class="arc-notes">
+            <li><h3>Review, then pay</h3><p>Payment comes after the application review, so applicants know what they&rsquo;re paying for.</p></li>
+            <li><h3>Paying isn&rsquo;t submitting</h3><p>The page explains that payment starts the reports. It doesn&rsquo;t submit the application.</p></li>
+            <li><h3>A total that adds up</h3><p>The total shows exactly what the fee includes, including the reusable package.</p></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pull-moment" id="payment-flow-closing">
         <p class="label pull-moment-eyebrow">Hypothesis</p>
         <p class="pull-moment-statement">If applicants see the full application before paying and their reports before submitting, they&rsquo;ll understand what they&rsquo;re buying and exactly when the application is sent.</p>
       </div>
@@ -230,9 +329,10 @@
   </div>
 
   <script src="js/screens.js?v=20260821d"></script>
-  <script src="js/phone.js?v=20260821d"></script>
+  <script src="js/phone.js?v=20261110a"></script>
   <script src="js/payment-flow.js?v=20260821d"></script>
   <script src="js/shell.js?v=20261110c"></script>
+  <script src="js/lab.js?v=20261110a"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
   <script src="js/app.js?v=20260821d"></script>

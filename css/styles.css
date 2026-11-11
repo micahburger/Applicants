@@ -736,6 +736,9 @@ html {
    "never under 18px" accent-discipline floor (see the note up near
    --page-accent's definition). */
 .pull-moment { max-width: 925px; margin: 0 auto; }
+/* Was an inline style; here so the lab's takes (css/lab.css) can give it
+   their own room. */
+#payment-flow-closing { margin-top: 40px; }
 .pull-moment-eyebrow { margin: 0 0 16px; }
 .pull-moment-statement {
   /* v2's .cs-statement: the numbers as one large sentence, the key
