@@ -88,9 +88,9 @@ html:not([data-arcs="current"]) #arc-2 .wrap {
   min-width: 0;
 }
 
-/* Brief: Opendoor's intro has no headline under the page title, so neither
-   does this; the paragraph is the opening. */
-html[data-intro="brief"] .intro-title { display: none; }
+/* Brief used to drop the headline, as Opendoor's intro has none. It shows
+   now: the copy pass (2026-11-10) made "A clearer path from application to
+   submission." the section's stated point, so every take carries it. */
 
 @media (min-width: 1000px) {
   .intro-take {

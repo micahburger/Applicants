@@ -6,13 +6,13 @@
    ============================================================================ */
 
 const SECTIONS = [
-  { id: 'hero',              name: 'Hero' },
-  { id: 'thesis',            name: 'Thesis' },
-  { id: 'diagnosis',         name: 'Diagnosis' },
-  { id: 'arc-1',             name: 'Arc one' },
-  { id: 'arc-2',             name: 'Arc two' },
-  { id: 'arc-3',             name: 'Arc three' },
-  { id: 'close',             name: 'Close' },
+  { id: 'hero',              name: 'Overview' },
+  { id: 'thesis',            name: 'Context' },
+  { id: 'diagnosis',         name: 'Problems' },
+  { id: 'arc-1',             name: 'Progress' },
+  { id: 'arc-2',             name: 'Review' },
+  { id: 'arc-3',             name: 'Payment' },
+  { id: 'close',             name: 'Evaluation' },
 ];
 
 const shellReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

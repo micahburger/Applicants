@@ -755,7 +755,7 @@ function payment() {
     stepHeader({ title: '789 Birch Blvd, Unit 8', step: 2, total: 2 }),
     h('div', { class: 'rs-page-head' },
       h('h1', { class: 'rs-h1', text: 'Confirm and pay' }),
-      h('p', { class: 'rs-subtitle', text: 'Your reports start running once you pay.' })
+      h('p', { class: 'rs-subtitle', text: 'Paying starts your reports. You’ll review them before sending your application to the agent.' })
     ),
     h('div', { class: 'rs-card' }, totalRow, breakdown),
     h('div', { class: 'rs-card' }, screeningRow),
