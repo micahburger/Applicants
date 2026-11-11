@@ -1,9 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Manrope:wght@400;500;600;700&family=Poppins:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Manrope:wght@400;500;600;700&display=swap');
 
 /* ============================================================================
    APPLICANTS — design tokens
-   Real CSS custom properties, not JS objects — unlike lattice2026, this page
-   never swaps palettes at runtime, so the tokens can live where they belong.
 
    TWO REGISTERS. They must not bleed into each other:
      --page-*  the portfolio voice. Everything that's Micah talking: hero,
@@ -12,48 +10,82 @@
                applied only to the device-viewport contents. Never reference
                --rs-* outside `.product`, never reference --page-* inside it.
    No lint config enforces this yet — this comment is the enforcement.
+
+   THE PORTFOLIO REGISTER IS v2's (Micah, 2026-11-10: "we want to make sure
+   we're systematizing my portfolio site"). This page started on lattice's
+   Graphite Night with the Contemporary type set (Instrument Sans headings,
+   Inter body, Plex Mono labels, a 1080px column). Every micahburger.com
+   case study is now one system, and the source of truth is v2's Night
+   case study (v2-site/app/src/styles/global.css):
+     - colours: v2's Night palette, copied into the --page-* names below;
+     - type: Poppins 400/500 only, at the shared --cs-* sizes;
+     - layout and corners: the same --gutter, column and --radius-* values.
+   The --cs-* and --radius-media/card/phone names are declared in v2's :root
+   with the same values; change one, change both. Only the RentSpree
+   register (.product, its own fonts) is this page's alone.
    ============================================================================ */
 
 :root {
-  /* ── Portfolio register — inherited from lattice2026's Graphite Night
-     atmosphere + contemporary type system. This is the hand. ───────────── */
-  --page-bg:      #161516;
-  --page-surface: #1D1D1D;
-  --page-fg:      #F4F1EC;
-  --page-soft:    #D0C9C1;
-  --page-muted:   #B7B0A8;
-  --page-rule:    #303030;
-  --page-accent:  #9C8B70; /* the one warm note — don't add another */
+  /* ── Colour: v2's Night palette, value for value ───────────────────────
+     page = Night's --paper; fg = --black (titles, note titles); soft =
+     --ink (paragraphs); accent = --link (numbers, the stated outcome's
+     highlight); rule = --rule; surface = the 6% lift v2 uses for cards;
+     chip = the 14% lift its small round buttons use. muted is v2's
+     caption (ink at about 70%) as a colour, since this page's labels
+     can't lean on opacity without fading their focus rings too. */
+  --page-bg:      #161417;
+  --page-fg:      #f4f1ec;
+  --page-soft:    #e4ded6;
+  --page-muted:   color-mix(in srgb, #e4ded6 72%, #161417);
+  --page-accent:  #c4ae88;
+  --page-rule:    rgba(244, 241, 236, 0.14);
+  --page-surface: color-mix(in srgb, #e4ded6 6%, #161417);
+  --page-chip:    color-mix(in srgb, #e4ded6 14%, #161417);
 
-  /* ── Type — contemporary system, ported verbatim from lattice's data.js ── */
-  --font-heading: 'Instrument Sans', system-ui, sans-serif;
-  --font-body:    'Inter', 'Helvetica Neue', sans-serif; /* contemporary.body in lattice's data.js */
-  --font-label:   'IBM Plex Mono', 'Courier New', monospace;
+  /* ── Type: Poppins, the only face, at 400 and 500 (the two loaded) ────
+     The three family names stay so every rule keeps saying what role its
+     text plays; they all point at the same face now. */
+  --font-heading: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
+  --font-body:    'Poppins', 'Helvetica Neue', Arial, sans-serif;
+  --font-label:   'Poppins', 'Helvetica Neue', Arial, sans-serif;
+  --tracking-body: 0.2px; /* v2's body letter-spacing */
 
-  --size-display: clamp(30px, 3.6vw, 54px);
-  --line-display: 1.04;
-  --weight-display: 600;
+  /* The shared case study scale (same names and values in v2). */
+  --cs-display: clamp(40px, 5.4vw, 76px); /* page title */
+  --cs-statement: clamp(30px, 3.6vw, 48px); /* a stated outcome */
+  --cs-heading: 38px; /* section titles, 1.25 leading, -0.01em */
+  --cs-lede: 18px; /* intro paragraphs, 1.5 leading */
+  --cs-body: 16px; /* paragraphs and notes, 1.6 leading */
+  --cs-small: 13px; /* captions and labels */
+  --cs-block: 120px; /* between blocks */
+  --cs-part: 160px; /* before a section title: a new part of the story */
+  --radius-media: 28px;
+  --radius-card: 20px;
+  --radius-phone: 36px;
 
-  --size-heading: clamp(18px, 1.8vw, 26px);
-  --line-heading: 1.12;
-  --weight-heading: 600;
+  /* The styleguide page's older names, pointed at the shared scale. */
+  --size-display: var(--cs-statement);
+  --line-display: 1.2;
+  --weight-display: 400;
+  --size-heading: 22px;
+  --line-heading: 1.25;
+  --weight-heading: 500;
+  --size-body: var(--cs-body);
+  --line-body: 1.6;
+  --size-label: var(--cs-small);
+  --weight-label: 500;
+  --tracking-label: 0.02em;
 
-  --size-body: 15px;
-  --line-body: 1.65;
-
-  --size-label: 10px;
-  --weight-label: 400;
-  --tracking-label: 0.14em; /* deliberate: lattice's own contemporary label is
-    0em/no-transform in data.js, but this page's eyebrows/captions/numbering
-    need to read as labels at a glance, so this is uppercase + wide tracking
-    per direction, not a strict port. Flagged in the report back. */
-
-  /* ── Motion — lattice's two curves, nothing else ─────────────────────── */
+  /* ── Motion — the shared curves (v2's EASE.enter / exit) ────────────── */
   --ease-enter: cubic-bezier(.22, 1, .36, 1);
   --ease-exit:  cubic-bezier(.4, 0, 1, 1);
   --duration-fast: 150ms;
   --duration-base: 200ms;
   --duration-slow: 250ms;
+  /* The shared hover grow (v2 and the folio): pills 1.12. */
+  --hover-grow-scale-button: 1.12;
+  --hover-grow-duration: 0.32s;
+  --hover-grow-easing: cubic-bezier(0.22, 1, 0.36, 1);
 
   /* ── Reveal timing — scroll-triggered fade/rise speeds. Separate scale
      from the UI-motion durations above (those are for hover/interaction,
@@ -64,13 +96,13 @@
   --reveal-medium: 400ms;
   --reveal-slow:   700ms;
 
-  /* ── Radii — 8–20px band, same as lattice's chrome ───────────────────── */
+  /* ── Radii — the shared three above, plus a small one for list rows ── */
   --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  --radius-md: var(--radius-media);
+  --radius-lg: var(--radius-card);
 
-  /* ── Shadows — lattice's actual layered values, reused verbatim ──────── */
-  --shadow-sm: 0 8px 30px rgba(0, 0, 0, 0.28);
+  /* ── Shadows — only the phones cast one (they're objects on the page);
+     chrome like the section pill doesn't, as on v2. ──────────────────── */
   --shadow-md: 0 20px 60px rgba(0, 0, 0, 0.32);
   --shadow-lg: 0 30px 80px rgba(0, 0, 0, 0.4);
 
@@ -90,10 +122,26 @@
     drop-shadow(18px 26px 26px rgba(0, 0, 0, 0.07))
     drop-shadow(30px 42px 40px rgba(0, 0, 0, 0.06));
 
-  /* ── Layout — the deliberate break from lattice's edge-to-edge canvas ── */
-  --content-max: 1080px;
-  --gutter: clamp(20px, 6vw, 48px);
-  --space-section: clamp(64px, 10vw, 120px);
+  /* ── Layout — v2's column: 1220px of content between 30px gutters, so
+     text starts on the same line as the header above it. Media-heavy
+     sections still widen past it (thesis, arc two, close). Sections are
+     padded half a --cs-part top and bottom, so one part starts --cs-part
+     after the last, as a new section title does on v2. ─────────────── */
+  --content-max: 1280px;
+  --gutter: 30px;
+  --space-section: calc(var(--cs-part) / 2);
+}
+
+@media (max-width: 900px) {
+  :root {
+    --cs-display: 32px;
+    --cs-statement: 28px;
+    --cs-heading: 26px;
+    --cs-block: 80px;
+    --cs-part: 112px;
+    --radius-media: 20px;
+    --radius-phone: 28px;
+  }
 }
 
 /* ── RentSpree register — the product being demoed. Scoped to `.product`
@@ -149,10 +197,13 @@
 body { min-height: 100vh; margin: 0; }
 body {
   background: var(--page-bg);
-  color: var(--page-fg);
+  /* v2's body text is its --ink (soft here); the brighter fg is kept for
+     titles and note titles, as on v2. */
+  color: var(--page-soft);
   font-family: var(--font-body);
   font-size: var(--size-body);
   line-height: var(--line-body);
+  letter-spacing: var(--tracking-body);
 }
 img { max-width: 100%; display: block; }
 a { color: inherit; }
@@ -193,7 +244,7 @@ a { color: inherit; }
   font-family: var(--font-label);
   font-size: var(--size-label);
   font-weight: var(--weight-label);
-  text-transform: uppercase;
+  /* v2's .cs-label: sentence case, not the old mono uppercase. */
   letter-spacing: var(--tracking-label);
   color: var(--page-muted);
   margin: 0;
@@ -319,15 +370,15 @@ section {
   gap: 8px;
   padding: 10px 18px 10px 14px;
   border-radius: 999px;
-  background: color-mix(in srgb, #e4ded6 14%, var(--page-bg));
-  color: #f4f1ec;
-  font-family: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
+  background: var(--page-chip);
+  color: var(--page-fg);
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 500;
   line-height: 1.2;
   letter-spacing: 0.2px;
   text-decoration: none;
-  transition: scale 0.32s var(--ease-enter);
+  transition: scale var(--hover-grow-duration) var(--hover-grow-easing);
 }
 .cs-home svg {
   width: 16px;
@@ -335,7 +386,7 @@ section {
   transition: transform 0.32s var(--ease-enter);
 }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .cs-home:hover { scale: 1.12; }
+  .cs-home:hover { scale: var(--hover-grow-scale-button); }
   .cs-home:hover svg { transform: translateX(-3px); }
 }
 .cs-home:focus-visible {
@@ -347,19 +398,19 @@ section {
 .cs-hero__title {
   max-width: 1000px;
   margin: 0;
-  font-family: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
-  font-size: clamp(40px, 5.4vw, 76px);
+  font-family: var(--font-heading);
+  font-size: var(--cs-display);
   font-weight: 400;
   line-height: 1.06;
   letter-spacing: -0.015em;
-  color: #e4ded6;
+  color: var(--page-soft);
   text-wrap: balance;
 }
 
 @media (max-width: 900px) {
   .cs-bar { top: 16px; margin-top: 112px; }
   .cs-hero { padding-top: 24px; }
-  .cs-hero__title { font-size: 32px; line-height: 1.12; }
+  .cs-hero__title { line-height: 1.12; }
 }
 
 /* ============================================================================
@@ -391,24 +442,30 @@ html {
   z-index: 40;
   display: flex;
   align-items: center;
-  gap: 10px;
-  border: 1px solid var(--page-rule);
-  background: rgba(29, 29, 29, 0.92);
-  backdrop-filter: blur(6px);
+  gap: 8px;
+  /* The Back to home pill's look (v2's --chip, Poppins 500 14px, no
+     outline and no shadow: Micah doesn't want strokes on small round
+     buttons), so the two pieces of page chrome are one family. Hover
+     grows it by the shared button token instead of swapping the fill. */
+  border: none;
+  background: var(--page-chip);
   border-radius: 999px;
-  padding: 12px 18px;
+  padding: 10px 18px;
   font-family: var(--font-label);
-  font-size: 11px;
-  letter-spacing: 0.06em;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: var(--tracking-body);
   color: var(--page-fg);
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: background-color var(--duration-base) ease;
+  transition: scale var(--hover-grow-duration) var(--hover-grow-easing);
 }
-.section-pill:hover { background: rgba(40, 40, 40, 0.95); }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .section-pill:hover { scale: var(--hover-grow-scale-button); }
+}
 .section-pill:focus-visible { outline: 2px solid var(--page-accent); outline-offset: 2px; }
-.section-pill .pill-count { color: var(--page-accent); font-weight: 600; }
-.section-pill .pill-sep { color: var(--page-rule); }
+.section-pill .pill-count { color: var(--page-accent); }
+.section-pill .pill-sep { color: var(--page-muted); }
 
 .section-jumplist {
   position: fixed;
@@ -417,8 +474,7 @@ html {
   z-index: 40;
   width: min(260px, calc(100vw - 40px));
   background: var(--page-surface);
-  border: 1px solid var(--page-rule);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-card);
   box-shadow: var(--shadow-md);
   padding: 8px;
   animation: pillListIn var(--duration-slow) var(--ease-enter);
@@ -437,8 +493,7 @@ html {
   padding: 10px 12px;
   border-radius: var(--radius-sm);
   font-family: var(--font-label);
-  font-size: 12px;
-  letter-spacing: 0.03em;
+  font-size: 14px;
   color: var(--page-soft);
   cursor: pointer;
   transition: background-color .15s ease, color .15s ease;
@@ -453,14 +508,14 @@ html {
 .eyebrow { display: none; }
 .section-headline {
   margin: 0 0 20px;
-  max-width: 780px;
-  font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 38px;
-  line-height: 1.15;
+  max-width: 900px;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: var(--cs-heading);
+  line-height: 1.25;
   letter-spacing: -0.01em;
 }
-.section-body { font-family: var(--font-body); font-weight: 300; font-size: 16px; line-height: 1.6; color: var(--page-soft); max-width: 620px; margin: 0; }
+.section-body { font-family: var(--font-body); font-weight: 400; font-size: var(--cs-body); line-height: 1.6; color: var(--page-soft); max-width: 640px; margin: 0; }
 .section-body + .section-body { margin-top: 16px; }
 
 /* ── Thesis intro — text + phone as one centered bundle, not a full-width
@@ -545,10 +600,9 @@ html {
    .pull-line above), so hover/focus just brightens muted -> soft instead. */
 .collage-replay {
   font-family: var(--font-label);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: var(--cs-small);
+  font-weight: 500;
+  letter-spacing: 0.02em;
   color: var(--page-muted);
   background: none;
   border: none;
@@ -566,8 +620,9 @@ html {
 .moment { padding: 40px 0; }
 .moment:first-of-type { padding-top: 0; }
 .moment-heading {
-  font-family: var(--font-label); font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--page-muted); margin: 30px 0 24px;
+  /* v2's .cs-label: small, 500, a hair of tracking, quiet. */
+  font-family: var(--font-label); font-size: var(--cs-small); font-weight: 500; letter-spacing: 0.02em;
+  color: var(--page-muted); margin: 30px 0 24px;
 }
 /* Arc three has no moment-heading ahead of its phone (unlike arc-1's
    moments), so without its own top space it sits flush against the
@@ -618,8 +673,8 @@ html {
      clamp() and wins the cascade on every "display section-headline"
      heading, so 38px fixed is genuinely what "the other headlines" are,
      not --size-display. */
-  font-family: var(--font-heading); font-weight: 600; font-size: 38px;
-  line-height: 1.15; color: var(--page-fg); margin: 0 0 16px; text-wrap: balance;
+  font-family: var(--font-heading); font-weight: 400; font-size: var(--cs-heading);
+  line-height: 1.25; letter-spacing: -0.01em; color: var(--page-fg); margin: 0 0 16px; text-wrap: balance;
 }
 
 .notes {
@@ -631,8 +686,8 @@ html {
      the sticky rule below nothing to actually move within. */
   align-self: start;
 }
-.notes li { display: flex; gap: 14px; font-family: var(--font-body); font-size: 13px; line-height: 1.75; color: var(--page-soft); }
-.notes .n { font-family: var(--font-label); font-size: 12px; color: var(--page-muted); flex-shrink: 0; width: 16px; padding-top: 1px; }
+.notes li { display: flex; gap: 14px; font-family: var(--font-body); font-size: var(--cs-body); line-height: 1.6; color: var(--page-soft); }
+.notes .n { font-family: var(--font-label); font-size: var(--cs-small); font-weight: 500; color: var(--page-accent); flex-shrink: 0; width: 18px; padding-top: 3px; }
 @media (min-width: 1000px) {
   /* Sticky notes — locks at top:96px (clears the 56px top bar plus some
      breathing room) as you scroll through a phone, then releases on its
@@ -651,13 +706,13 @@ html {
 .diagnosis-item .num {
   font-family: var(--font-label); font-size: 20px; color: var(--page-accent); flex-shrink: 0; width: 36px; line-height: 1.3;
 }
-.diagnosis-item h3 { font-family: var(--font-heading); font-weight: 600; font-size: 19px; color: var(--page-fg); margin: 0 0 8px; }
-.diagnosis-item p { font-family: var(--font-body); font-size: 14px; line-height: 1.75; color: var(--page-soft); margin: 0; }
+.diagnosis-item h3 { font-family: var(--font-heading); font-weight: 500; font-size: var(--cs-body); line-height: 1.4; color: var(--page-fg); margin: 0 0 6px; } /* v2's .cs-notes__title */
+.diagnosis-item p { font-family: var(--font-body); font-size: var(--cs-body); line-height: 1.6; color: var(--page-soft); margin: 0; }
 
 /* ── Pull line / pull quote ────────────────────────────────────────────── */
 .pull-quote {
-  font-family: var(--font-heading); font-weight: 500; font-size: clamp(26px, 4.2vw, 46px);
-  line-height: 1.28; color: var(--page-accent); margin: 0; max-width: 780px; text-wrap: balance;
+  font-family: var(--font-heading); font-weight: 400; font-size: var(--cs-statement);
+  line-height: 1.2; letter-spacing: -0.015em; color: var(--page-accent); margin: 0; max-width: 780px; text-wrap: balance;
 }
 
 /* ── Divider strip — small type, no heading ───────────────────────────────
@@ -670,7 +725,7 @@ html {
   padding: 28px 0; margin: 8px 0;
 }
 .divider-strip p {
-  font-family: var(--font-body); font-size: 13px; line-height: 1.75; color: var(--page-soft);
+  font-family: var(--font-body); font-size: var(--cs-body); line-height: 1.6; color: var(--page-soft);
   max-width: 680px; margin: 0;
 }
 
@@ -683,8 +738,10 @@ html {
 .pull-moment { max-width: 925px; margin: 0 auto; }
 .pull-moment-eyebrow { margin: 0 0 16px; }
 .pull-moment-statement {
-  font-family: var(--font-heading); font-weight: 500;
-  font-size: clamp(22px, 3vw, 34px); line-height: 1.35;
+  /* v2's .cs-statement: the numbers as one large sentence, the key
+     clause in the accent. */
+  font-family: var(--font-heading); font-weight: 400;
+  font-size: var(--cs-statement); line-height: 1.2; letter-spacing: -0.015em;
   color: var(--page-fg); margin: 0; text-wrap: balance;
 }
 .pull-moment-highlight { color: var(--page-accent); }
@@ -735,7 +792,6 @@ html {
     position: relative; z-index: 1; /* stack above the photo — see .closing-image */
   }
   .closing-block { max-width: none; }
-  .closing-block .section-headline { font-size: 32px; }
   /* No z-index of its own meant the 8px negative margin above put this on
      top of the text column by plain DOM order — the opposite of "landing
      it slightly under the text column's edge." z-index:0 (a positioned
@@ -769,7 +825,7 @@ html {
 .site-footer {
   display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; align-items: baseline;
   padding: 40px var(--gutter) 48px; border-top: 1px solid var(--page-rule);
-  font-family: var(--font-label); font-size: 11px; letter-spacing: 0.06em; color: var(--page-muted);
+  font-family: var(--font-label); font-size: var(--cs-small); color: var(--page-muted);
 }
 .site-footer a { color: var(--page-soft); text-decoration: underline; text-underline-offset: 3px; }
 .site-footer a:hover { color: var(--page-fg); }
@@ -831,7 +887,8 @@ html {
 .phone-frame.is-live .phone-activate-overlay { display: none; }
 
 .phone-caption, .still-caption {
-  font-family: var(--font-body); font-size: 13px; line-height: 1.6; color: var(--page-soft);
+  /* v2's .cs-caption. */
+  font-family: var(--font-body); font-size: var(--cs-small); line-height: 1.5; color: var(--page-muted);
   text-align: center; max-width: 340px; margin: 0;
   transition: opacity var(--duration-base) ease;
 }
@@ -844,19 +901,20 @@ html {
 .phone-controls { display: flex; align-items: center; gap: 14px; }
 .phone-reset {
   background: none; border: none; padding: 4px 8px;
-  font-family: var(--font-label); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  font-family: var(--font-label); font-size: var(--cs-small); font-weight: 500; letter-spacing: 0.02em;
   color: var(--page-muted); cursor: pointer; transition: color .15s ease;
 }
 .phone-reset:hover { color: var(--page-fg); }
 .phone-reset:focus-visible { outline: 2px solid var(--page-accent); outline-offset: 2px; }
 
 .phone-states {
-  display: flex; gap: 3px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--page-rule);
+  /* A filled track, no outline (Micah: no strokes on small round controls). */
+  display: flex; gap: 3px; background: var(--page-surface);
   border-radius: 999px; padding: 3px;
 }
 .phone-states button {
   border: none; background: none; padding: 6px 14px; border-radius: 999px;
-  font-family: var(--font-label); font-size: 11px; letter-spacing: 0.03em; color: var(--page-muted);
+  font-family: var(--font-label); font-size: var(--cs-small); font-weight: 500; color: var(--page-muted);
   cursor: pointer; transition: background-color .15s ease, color .15s ease;
 }
 .phone-states button.active { background: var(--page-fg); color: var(--page-bg); }
@@ -879,8 +937,8 @@ html {
   padding: calc(64px + env(safe-area-inset-top, 0px)) var(--gutter) 80px;
 }
 .v1-sheet-title {
-  font-family: var(--font-heading); font-weight: 600; color: var(--page-fg);
-  font-size: clamp(28px, 4vw, 44px); line-height: 1.08; margin: 0 0 40px;
+  font-family: var(--font-heading); font-weight: 400; color: var(--page-fg);
+  font-size: var(--cs-heading); line-height: 1.25; letter-spacing: -0.01em; margin: 0 0 40px;
 }
 .v1-sheet-image {
   display: block; width: 100%; height: auto; border-radius: var(--radius-md);
