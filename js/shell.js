@@ -164,7 +164,7 @@ function wirePillNav() {
     const v1Btn = document.createElement('button');
     v1Btn.type = 'button';
     v1Btn.className = 'v1-trigger';
-    v1Btn.textContent = 'Application experience V1';
+    v1Btn.textContent = 'Applicant experience V1';
     v1Btn.addEventListener('click', () => { closeList(); openV1Sheet(); });
     listEl.appendChild(v1Btn);
     root.appendChild(listEl);
