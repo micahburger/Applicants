@@ -418,7 +418,7 @@ html {
 }
 .reveal.is-visible { opacity: 1; transform: translateY(0); }
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .closing-block, .collage-front, .collage-mid, .collage-back { opacity: 1; transform: none; transition: none; }
+  .reveal, .closing-hypothesis, .closing-block, .closing-image, .collage-front, .collage-mid, .collage-back { opacity: 1; transform: none; transition: none; }
   .collage-replay { display: none; }
 }
 
@@ -766,7 +766,6 @@ html {
    "never under 18px" accent-discipline floor (see the note up near
    --page-accent's definition). */
 .pull-moment { max-width: 925px; margin: 0 auto; }
-#payment-flow-closing { margin-top: var(--cs-block); }
 .pull-moment-eyebrow { margin: 0 0 16px; }
 .pull-moment-statement {
   /* v2's .cs-statement: the numbers as one large sentence, the key
@@ -777,79 +776,133 @@ html {
 }
 .pull-moment-highlight { color: var(--page-accent); }
 
-/* ── Close — left-aligned text column with the hand-with-phone photo
-   overlapping on the right, the only raster image on the page, reserved
-   for this final beat. Widened past the standard reading column since the
-   text column + a wide photo need more room than a single reading column.
-   Below 1100px the composition doesn't hold up at any reasonable size, so
-   it just stacks in document order — text column, then photo. ─────────── */
-#close .wrap { max-width: 1482px; }
+/* ── Close — the hypothesis, the three closing blocks, and the hand photo
+   (Micah, 2026-11-11: "Overlap", picked from a lab of four, then turned
+   upside down). The copy comes first, the blocks side by side, and the
+   photo sits under it, big, its dark top rising up behind the copy so the
+   words and the picture read as one piece.
 
-.closing-composite { display: flex; flex-direction: column; align-items: center; gap: 48px; }
-.closing-text-col { display: flex; flex-direction: column; align-items: center; gap: 48px; }
-.closing-block { max-width: 480px; }
-.closing-block .section-headline { max-width: none; }
+   Big on purpose ("make it impactful"): about twice the size it was beside
+   the old text column, but no bigger than keeps the whole phone on one
+   desktop screen. The phone fills roughly 9% to 71% of the photo's height,
+   so at 1120px wide (1430 tall) it's about 880px of phone. The photo is
+   wider than the column it overlaps and nudged left, because the phone
+   sits right of centre in the frame; the nudge puts it under the middle of
+   the page.
 
+   It replaced a column of three 38px blocks with the photo overlapping
+   them on the right, and the hypothesis lived at the end of the payment
+   arc; together they read as two separate endings. ───────────────────── */
+.closing-composite {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+/* Above the photo, so the overlap paints the copy over it. */
+.closing-copy {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: grid;
+  gap: 56px;
+}
+.closing-hypothesis { max-width: 980px; margin: 0; }
+.closing-blocks {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 40px;
+}
+/* 26px, the phone size of --cs-heading: three 38px titles in a third of
+   the column each wrapped to three lines and outweighed the text under
+   them. */
+.closing-title {
+  margin: 0 0 12px;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--page-fg);
+  text-wrap: balance;
+}
+
+/* The photo's ground is near enough the page's to fade into it, so every
+   edge fades rather than showing a box: the top under the copy, the
+   bottom where the arm trails off, and the sides. Two gradients
+   intersected rather than one oval, so the top and bottom can fade over
+   different distances. */
 .closing-image {
-  width: min(100%, 747px);
+  position: relative;
+  z-index: 0;
+  /* On a phone, edge to edge: the column plus both gutters, so the photo
+     runs past the text margins (the side fades keep it from reading as a
+     box). Capped for tablets, where the desktop size takes over at 1000. */
+  width: min(calc(100% + 2 * var(--gutter)), 560px);
+  margin-top: -40px;
   aspect-ratio: 1110 / 1417;
   background-image: url('../img/closing.jpg');
   background-size: cover;
   background-position: center;
-  /* --page-bg (#161516) was picked to match this photo's own near-black
-     background almost exactly, so the edge is already close to invisible —
-     the fade is just insurance against the last bit of compression noise. */
-  -webkit-mask-image: radial-gradient(ellipse 70% 65% at center, black 60%, transparent 100%);
-          mask-image: radial-gradient(ellipse 70% 65% at center, black 60%, transparent 100%);
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent 0%, #000 26%, #000 68%, transparent 94%),
+    linear-gradient(to right, transparent 0%, #000 14%, #000 86%, transparent 100%);
+  -webkit-mask-composite: source-in;
+          mask-image:
+    linear-gradient(to bottom, transparent 0%, #000 26%, #000 68%, transparent 94%),
+    linear-gradient(to right, transparent 0%, #000 14%, #000 86%, transparent 100%);
+          mask-composite: intersect;
 }
 
-@media (min-width: 1100px) {
-  /* Text column (460) + photo (747), pulled 30px closer than the initial
-     22px gap — gap can't go negative in CSS, so the photo instead carries
-     an 8px negative margin, landing it slightly under the text column's
-     edge. Centered as that tight pair within the wider 1482px wrap, same
-     justify-content:center pattern used elsewhere, rather than stretched
-     to the wrap's full width. */
-  .closing-composite { display: flex; flex-direction: row; justify-content: center; align-items: flex-start; gap: 0; }
-  /* Text (460) + photo (747) sum past 1080's content-max as soon as the
-     gutters come off a narrow-ish desktop — at 1100px there's only ~1000px
-     to work with, ~200px short. flex-shrink:0 on both used to just run the
-     row off the edges. Letting them shrink (default flex-shrink:1, weighted
-     by their basis) splits that deficit proportionally instead, so they
-     scale down together and settle back at their true 460/747 once the
-     viewport actually has room — no separate narrow-desktop layout needed. */
-  .closing-text-col {
-    align-items: flex-start; gap: 64px; flex: 0 1 460px; min-width: 300px;
-    position: relative; z-index: 1; /* stack above the photo — see .closing-image */
+@media (min-width: 1000px) {
+  .closing-copy { gap: 72px; }
+  .closing-blocks {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: var(--gutter);
   }
-  .closing-block { max-width: none; }
-  /* No z-index of its own meant the 8px negative margin above put this on
-     top of the text column by plain DOM order — the opposite of "landing
-     it slightly under the text column's edge." z-index:0 (a positioned
-     ancestor isn't required; flex items get their own stacking context)
-     puts it behind .closing-text-col's z-index:1 instead, so the overlap
-     tucks under the text like the comment always intended. */
-  .closing-image { flex: 0 1 747px; min-width: 400px; margin-left: -8px; position: relative; z-index: 0; }
+  /* The photo runs up under the blocks by its empty dark top (the phone
+     starts about 9% down, ~130px at this width) plus a little more, where
+     the top fade has the phone's edge at a third of its strength. Any
+     deeper and the phone's bright screen lands under the middle and right
+     blocks and the text stops reading (tried -300px). translate rather
+     than a margin for the nudge, so the column's centring isn't thrown
+     off. */
+  .closing-image {
+    width: min(1120px, 92vw);
+    margin-top: -170px;
+    translate: -9% 0;
+  }
+}
 
-  /* ── Build-in — desktop only. The wrap's usual single whole-section fade
-     (.reveal above) is neutralized here; .closing-composite carries that
-     same reveal/is-visible wiring instead, purely as a trigger — it stays
-     visually inert itself, and each block fades in on its own delay once
-     it fires, so the three blocks arrive as a sequence rather than at once.
-     Below this breakpoint the composition doesn't hold, so the plain
-     whole-wrap fade from .reveal is left alone as-is. ────────────────── */
+/* Only with motion allowed: shell.js never adds is-visible under reduced
+   motion, so these opacity-0 starting states would otherwise stick, and
+   coming later in the file they'd beat the reduced-motion reset above. */
+@media (min-width: 1000px) and (prefers-reduced-motion: no-preference) {
+  /* Build-in: the hypothesis, then the three blocks one after another,
+     then the photo rising into place under them. The section's usual
+     whole-wrap fade (.reveal) is neutralised; .closing-composite keeps the
+     reveal wiring only as the trigger. */
   #close .wrap.reveal,
   .closing-composite.reveal {
     opacity: 1; transform: none; transition: none;
   }
-  .closing-block {
+  .closing-hypothesis,
+  .closing-block,
+  .closing-image {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(24px);
     transition: opacity var(--reveal-slow) var(--ease-enter), transform var(--reveal-slow) var(--ease-enter);
   }
-  .closing-composite.is-visible .closing-text-col .closing-block:nth-child(1) { opacity: 1; transform: none; }
-  .closing-composite.is-visible .closing-text-col .closing-block:nth-child(2) { opacity: 1; transform: none; transition-delay: .3s; }
-  .closing-composite.is-visible .closing-text-col .closing-block:nth-child(3) { opacity: 1; transform: none; transition-delay: .6s; }
+  .closing-image {
+    transform: translateY(80px);
+    transition-duration: 1.2s;
+  }
+  .closing-composite.is-visible .closing-hypothesis,
+  .closing-composite.is-visible .closing-block,
+  .closing-composite.is-visible .closing-image { opacity: 1; transform: none; }
+  .closing-composite.is-visible .closing-block:nth-child(1) { transition-delay: .25s; }
+  .closing-composite.is-visible .closing-block:nth-child(2) { transition-delay: .4s; }
+  .closing-composite.is-visible .closing-block:nth-child(3) { transition-delay: .55s; }
+  .closing-composite.is-visible .closing-image { transition-delay: .35s; }
 }
 
 /* ── Footer ────────────────────────────────────────────────────────────── */
