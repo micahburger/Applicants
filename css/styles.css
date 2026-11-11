@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Manrope:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Manrope:wght@400;500;600;700&family=Poppins:wght@400;500&display=swap');
 
 /* ============================================================================
    APPLICANTS — design tokens
@@ -94,18 +94,6 @@
   --content-max: 1080px;
   --gutter: clamp(20px, 6vw, 48px);
   --space-section: clamp(64px, 10vw, 120px);
-
-  /* ── Hero signature palette — scoped exception to the one-accent rule
-     above. The character-scramble in js/hero.js is a single deliberate
-     flourish, not part of the page's restrained chrome, so it gets its own
-     small saturated set (ported from the source CodePen) instead of cycling
-     through the neutral --page-* ramp, which read as colorless against
-     --page-bg. Used nowhere outside js/hero.js. */
-  --hero-spark-1: #85AF00; /* moss/chartreuse */
-  --hero-spark-2: #FFCC00; /* signal yellow */
-  --hero-spark-3: #FB9CFD; /* magenta pink */
-  --hero-spark-4: #A19BFF; /* periwinkle */
-  --hero-spark-5: #FF4C00; /* orange-red */
 }
 
 /* ── RentSpree register — the product being demoed. Scoped to `.product`
@@ -153,7 +141,12 @@
 
 /* ── Reset ────────────────────────────────────────────────────────────── */
 * { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; }
+/* No fixed height on either: a sticky element can only hold inside its
+   parent, and html/body capped at one viewport let the locked Back to home
+   pill (.cs-bar) go after the first screen. With body on min-height alone,
+   desktop was fine, but on a phone html's 100% still left the pill
+   hit-testable at the top while painting it off screen. */
+body { min-height: 100vh; margin: 0; }
 body {
   background: var(--page-bg);
   color: var(--page-fg);
@@ -237,10 +230,9 @@ section {
   padding-top: var(--space-section);
   padding-bottom: var(--space-section);
 }
-/* #hero manages its own vertical rhythm via .title's min-height:100vh +
-   padding — stacking the generic section padding on top of that made the
-   hero ~1.5x a viewport tall, pushing the last two lines and the scroll
-   cue below the fold on load. */
+/* #hero is just the case study header now (.cs-hero below); the room above
+   it is the Back to home bar's, and the thesis section's own top padding is
+   the gap below it. */
 #hero {
   padding-top: 0;
   padding-bottom: 0;
@@ -281,52 +273,102 @@ section {
   border-radius: calc(var(--radius-lg) + 2px);
 }
 
-/* ── Hero — character-scramble stack ──────────────────────────────────────
-   No field of its own (the page is already --page-bg) — weight comes from
-   scale and emptiness. SplitText/scramble wiring lives in js/hero.js. ────── */
-.title {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: crosshair;
-  text-align: center;
-  padding: var(--space-section) var(--gutter);
-}
-.title h1 {
-  font-family: var(--font-heading);
-  font-size: 7.5vw;
-  font-weight: 600;
-  line-height: 0.95;
-  letter-spacing: -0.03em;
-  width: 80%;
+/* ── Case study header — shared with every micahburger.com case study ─────
+   (Micah, 2026-11-10.) Mirrors v2's CaseStudy.tsx and its "case study"
+   block in global.css, number for number, so this page opens exactly like
+   Opendoor's: Back to home in a small pill, then the title, set left on
+   v2's 1220px content width with 30px gutters. Change one, change both.
+
+   It replaced a centred four-line title with a per-character scramble on
+   hover (GSAP SplitText, js/hero.js): a one-off flourish, where the case
+   studies now share one plain header. Poppins 400/500 is loaded for it
+   alone (the @import at the top); the rest of the page keeps its own type.
+
+   .cs-wrap rather than .wrap: .wrap is this page's 1080px reading column,
+   and the header follows v2's width instead so the pill and title sit at
+   the same x on every case study. */
+.cs-wrap {
+  width: 100%;
+  max-width: 1280px;
   margin: 0 auto;
-  color: var(--page-fg);
+  padding: 0 30px;
 }
-.title h1.title-stanza { margin-top: 0.35em; } /* the blank-line break between the two stanzas of hero copy */
-.title .char { position: relative; display: inline-block; }
-.title .detail-size {
-  position: absolute;
-  left: 0;
-  bottom: -14px;
-  height: 1px;
-  line-height: 1;
-  font-family: var(--font-label);
-  font-size: 11px;
-  white-space: nowrap;
-  color: var(--page-accent);
+
+/* Back to home, locked on scroll. It rests 180px down, then sticks 24px
+   from the top as the page goes up under it. The rest is a margin, not
+   padding: sticky pins the border box and the margin sits outside it, so
+   the bar travels up through those 180px and then holds. Only the pill
+   takes the pointer; the empty run of bar beside it never blocks what's
+   underneath. z-index clears the phones and the reveal layers (the section
+   pill, bottom-right, is 40). */
+.cs-bar {
+  position: sticky;
+  top: 24px;
+  z-index: 35;
+  margin-top: 180px;
   pointer-events: none;
 }
-.scroll-cue { margin-top: 40px; }
+.cs-bar > * { pointer-events: auto; }
+
+/* v2's --chip on its Night palette: a lift of the page, no outline (Micah
+   doesn't want strokes on these). The arrow nudges left on hover and the
+   pill grows by the shared button token (1.12, ease-enter, 0.32s). */
+.cs-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px 10px 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, #e4ded6 14%, var(--page-bg));
+  color: #f4f1ec;
+  font-family: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.2px;
+  text-decoration: none;
+  transition: scale 0.32s var(--ease-enter);
+}
+.cs-home svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.32s var(--ease-enter);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .cs-home:hover { scale: 1.12; }
+  .cs-home:hover svg { transform: translateX(-3px); }
+}
+.cs-home:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.cs-hero { padding-top: 32px; }
+.cs-hero__title {
+  max-width: 1000px;
+  margin: 0;
+  font-family: 'Poppins', 'Helvetica Neue', Arial, sans-serif;
+  font-size: clamp(40px, 5.4vw, 76px);
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  color: #e4ded6;
+  text-wrap: balance;
+}
+
+@media (max-width: 900px) {
+  .cs-bar { top: 16px; margin-top: 112px; }
+  .cs-hero { padding-top: 24px; }
+  .cs-hero__title { font-size: 32px; line-height: 1.12; }
+}
 
 /* ============================================================================
-   SHELL — 8-section scroll structure, sticky bar, pill nav, keyboard nav,
+   SHELL — 8-section scroll structure, pill nav, keyboard nav,
    scroll-triggered reveal. Wiring lives in js/shell.js.
    ============================================================================ */
 
 html {
-  scroll-padding-top: 56px; /* sticky bar height, so the chapter-jumper's target isn't hidden under it */
+  scroll-padding-top: 80px; /* the locked Back to home pill (24px down, ~38px tall) plus room, so the chapter-jumper's target isn't hidden under it */
 }
 
 /* ── Reveal-on-scroll — one fade+rise per section, fires once ────────────── */
@@ -340,32 +382,6 @@ html {
   .reveal, .closing-block, .collage-front, .collage-mid, .collage-back { opacity: 1; transform: none; transition: none; }
   .collage-replay { display: none; }
 }
-
-/* ── Sticky hairline bar — hidden while #hero is in view ─────────────────── */
-.top-bar {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 56px;
-  padding: 0 var(--gutter);
-  border-bottom: 1px solid var(--page-rule);
-  background: rgba(17, 17, 17, 0.86);
-  backdrop-filter: blur(6px);
-  font-family: var(--font-label);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--page-muted);
-  opacity: 0;
-  transform: translateY(-100%);
-  transition: opacity var(--duration-base) var(--ease-enter), transform var(--duration-base) var(--ease-enter);
-  pointer-events: none;
-}
-.top-bar.is-visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.top-bar .top-bar-section { color: var(--page-soft); }
 
 /* ── Pill nav — collapsed pill + plain jump list, lattice's curves ───────── */
 .section-pill {

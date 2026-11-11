@@ -1,6 +1,8 @@
 /* ============================================================================
    APPLICANTS — page shell. Section tracking, pill nav + jump list, keyboard
-   nav, sticky bar visibility, scroll-triggered reveal. Vanilla JS.
+   nav, scroll-triggered reveal. Vanilla JS. (The sticky hairline bar this
+   used to show and hide was replaced by the locked Back to home pill, which
+   is pure CSS: .cs-bar in css/styles.css.)
    ============================================================================ */
 
 const SECTIONS = [
@@ -25,25 +27,8 @@ function jumpTo(index) {
   if (el) el.scrollIntoView({ behavior: shellReducedMotion ? 'auto' : 'smooth', block: 'start' });
 }
 
-/* ── Sticky bar — hidden while #hero is in view ───────────────────────── */
-function wireTopBar() {
-  const bar = document.querySelector('.top-bar');
-  const hero = sectionEl('hero');
-  if (!bar || !hero) return;
-  const nameEl = bar.querySelector('.top-bar-section');
-
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      bar.classList.toggle('is-visible', !entry.isIntersecting);
-    });
-  }, { threshold: 0.15 });
-  observer.observe(hero);
-
-  return nameEl;
-}
-
-/* ── Active-section tracking — drives the pill label + sticky bar name ──── */
-function wireSectionTracking(topBarNameEl) {
+/* ── Active-section tracking — drives the pill label ───────────────────── */
+function wireSectionTracking() {
   const pillCount = document.querySelector('.section-pill .pill-count');
   const pillName = document.querySelector('.section-pill .pill-name');
 
@@ -55,7 +40,6 @@ function wireSectionTracking(topBarNameEl) {
       currentIndex = idx;
       if (pillCount) pillCount.textContent = `${idx + 1} / ${SECTIONS.length}`;
       if (pillName) pillName.textContent = SECTIONS[idx].name;
-      if (topBarNameEl) topBarNameEl.textContent = SECTIONS[idx].name;
       updateActiveJumpButton();
     });
   }, { threshold: 0.5 });
@@ -229,8 +213,7 @@ function wireKeyboardNav() {
 }
 
 function initShell() {
-  const topBarNameEl = wireTopBar();
-  wireSectionTracking(topBarNameEl);
+  wireSectionTracking();
   wireReveal();
   wireCollageReplay();
   wirePillNav();
