@@ -1,6 +1,6 @@
 # RETIRED (2026-11-11). This case study moved into v2: its files live in
 # micahburger/v2 at app/public/project/applicant-experience/ and are served
-# at https://v2.micahburger.com/project/applicant-experience/. Make changes
+# at https://micahburger.com/project/applicant-experience/. Make changes
 # there, not here.
 #
 # Every request to applicants.micahburger.com is sent, permanently, to the
@@ -8,8 +8,11 @@
 # so links already sent out keep working. The files below this .htaccess
 # are left as they were, unreachable, for the history.
 #
-# When v2 becomes micahburger.com, repoint the target (or let v2.'s own
-# redirect carry it).
+# The target was v2.micahburger.com until v2 became micahburger.com
+# (2026-11-13); it points straight at the real domain now, so there's one
+# hop, not two. This folder sits inside micahburger.com's public_html (it's
+# this subdomain's document root), so micahburger.com/applicants/ lands
+# here too and gets the same redirect.
 
 <IfModule mod_headers.c>
   Header always set Strict-Transport-Security "max-age=31536000"
@@ -22,5 +25,5 @@
   # .well-known stays open for the host's SSL certificate checks, so the
   # https certificate the redirect is served over keeps renewing.
   RewriteCond %{REQUEST_URI} !^/\.well-known/
-  RewriteRule ^(.*)$ https://v2.micahburger.com/project/applicant-experience/$1 [R=301,L]
+  RewriteRule ^(.*)$ https://micahburger.com/project/applicant-experience/$1 [R=301,L]
 </IfModule>
